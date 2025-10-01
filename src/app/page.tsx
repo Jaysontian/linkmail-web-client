@@ -9,6 +9,7 @@ import { getOAuthUrl } from '@/lib/api';
 import AnimatedPathText from '@/components/fancy/text/text-along-path';
 import ScrambleIn, { ScrambleInHandle } from '@/components/fancy/text/scramble-in';
 import Float from '@/components/fancy/blocks/float';
+import { Linkedin, ListChecks, MailCheck } from "lucide-react";
 
 // Component for cycling through different texts with scramble animation
 function CyclingScrambleText({ texts, interval = 4000 }: { texts: string[], interval?: number }) {
@@ -74,6 +75,7 @@ export default function Home() {
   ];
 
   return (
+    <div>
     <div className="min-h-screen bg-background px-4 sm:px-6 lg:px-8 py-2">
       <header>
         <div className="mx-auto max-w-7xl">
@@ -110,7 +112,7 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl min-h-[calc(100vh-12rem)] flex">
+      <main className="mx-auto max-w-7xl min-h-[calc(100vh-10rem)] flex">
         {/* Left Panel - Callout */}
         <div className="flex-1 flex flex-col justify-center px-8 py-12">
           <div className="max-w-lg text-center">
@@ -170,9 +172,103 @@ export default function Home() {
               />
             ))}
           </div>
-          
         </div>
+
       </main>
+
+      {/* Second Section – Features */}
+
+      <div className="mx-auto max-w-7xl pt-24 min-h-[calc(100vh-10rem)] flex flex-col items-center justify-center pb-12">
+
+        <div className="flex-1 flex flex-col justify-center px-8 py-6 text-center">
+          <h2 className="text-4xl font-bold text-primary mb-6 font-newsreader-500">Networking, but 20x faster.</h2>
+          <p className="max-w-lg text-lg text-secondary mb-12 leading-relaxed">
+            Linkmail helps you level up your networking and outreach – find more jobs, outreach more people, send more follow ups.
+          </p>
+        </div>
+
+        <div className="flex flex-row w-full items-stretch justify-center">
+          {/* Left: Video Demo */}
+          <div className="flex-1 flex flex-col justify-center items-center px-12 py-4">
+            <div className="w-full max-w-xl rounded-xl overflow-hidden border border-border">
+              <video
+                src="/demo_1.webm"
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-auto object-contain scale-101"
+                poster="/demo_poster.png"
+              >
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          </div>
+
+          {/* Right: Expandable Features */}
+          {/* Import Lucide icons at the top of your file if not already imported:
+              import { Linkedin, MailCheck, ListChecks } from "lucide-react";
+          */}
+          <div className="flex-1 flex flex-col justify-center items-center py-4">
+            <div className="w-full max-w-md space-y-4">
+              {[
+                {
+                  title: "Your LinkedIn Companion",
+                  content:
+                    "Linkmail lives right inside LinkedIn and appears when you're on someone's profile.",
+                  icon: <Linkedin className="w-5 h-5 mr-2 text-primary" />,
+                },
+                {
+                  title: "Automatic Email Finding",
+                  content:
+                    "Get verified professional emails for your prospects instantly. Useful for students and recruiters.",
+                  icon: <MailCheck className="w-5 h-5 mr-2 text-primary" />,
+                },
+                {
+                  title: "Automated Outreach Tracking",
+                  content:
+                    "Track your outreach, follow-ups, and responses in one place. Stay organized and never miss an opportunity to connect.",
+                  icon: <ListChecks className="w-5 h-5 mr-2 text-primary" />,
+                },
+              ].map((feature, idx) => (
+                <div key={idx} className="my-8 last:mb-0">
+                  <h3 className="text-2xl font-semibold text-primary font-newsreader-500 mb-2 flex items-center gap-2">
+                    {feature.icon}
+                    {feature.title}
+                  </h3>
+                  <p className="text-md text-secondary">{feature.content}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+      
+      </div>
+
+
+    </div>
+
+    <footer className="w-full bg-black text-white py-10 mt-12">
+      <div className="mx-auto max-w-7xl flex flex-col md:flex-row items-center justify-between gap-4 px-4">
+        {/* Left: Logo and name */}
+        <div className="flex items-center gap-4">
+          <img src="/logo.png" alt="LinkMail Logo" className="w-6 h-6" />
+          <span className="font-semibold text-base">LinkMail</span>
+          <p className="text-center text-xs flex-1 text-white/45">
+            &copy; {new Date().getFullYear()} Linkmail AI
+          </p>
+        </div>
+
+        {/* Right: Links */}
+        <div className="flex items-center gap-6">
+          <a href="/about" className="text-xs hover:underline transition-colors">About Us</a>
+          <a href="/privacy" className="text-xs hover:underline transition-colors">Privacy Policy</a>
+          <a href="/contact" className="text-xs hover:underline transition-colors">Contact Us</a>
+        </div>
+      </div>
+    </footer>
+            
     </div>
   );
 }
