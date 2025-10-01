@@ -262,7 +262,7 @@ export default function ProfilePage() {
       <div className="mb-8">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <h1 className="text-4xl font-newsreader-500 text-primary">
+            <h1 className="text-3xl font-tiempos-medium text-primary">
               Getting to know you.
             </h1>
             <p className="mt-4 text-[15px] max-w-lg text-secondary">

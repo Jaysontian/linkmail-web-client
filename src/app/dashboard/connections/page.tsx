@@ -128,10 +128,10 @@ export default function ConnectionsPage() {
     return (
       <div className="p-6">
         <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+          <div className="h-8 bg-foreground rounded w-1/4 mb-6"></div>
           <div className="space-y-4">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-20 bg-gray-200 rounded"></div>
+              <div key={i} className="h-20 bg-foreground rounded"></div>
             ))}
           </div>
         </div>
@@ -159,7 +159,7 @@ export default function ConnectionsPage() {
     <div className="max-w-4xl mx-auto p-6 pt-[100px]">
       {/* Header */}
       <div className="flex-1 py-">
-        <h1 className="text-4xl font-newsreader-500 text-primary">
+        <h1 className="text-3xl font-tiempos-medium text-primary">
           This is your network.
         </h1>
         <p className="mt-4 text-[15px] max-w-lg text-stone-500 pb-8">
@@ -170,19 +170,19 @@ export default function ConnectionsPage() {
       {/* Filters */}
       <div className="flex gap-4 mb-6">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-secondary" />
           <input
             type="text"
             placeholder="Search connections..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 border text-secondary border-border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="px-4 py-2 border text-secondary border-border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         >
           <option value="all">All Statuses</option>
           {Object.entries(statusLabels).map(([value, label]) => (
@@ -209,14 +209,14 @@ export default function ConnectionsPage() {
             <div
               key={`${connection.user_id}_${connection.contact_id}`}
               onClick={() => handleConnectionClick(connection.contact_id)}
-              className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-lg transition-all duration-200 cursor-pointer group"
+              className="bg-foreground border border-border rounded-xl p-4 hover:shadow-lg transition-all duration-200 cursor-pointer group"
             >
                {/* top toolbar */}
                <div className="flex items-center justify-between">
                  {/* Checkbox for selecting this connection (for future bulk actions) */}
                  <input
                    type="checkbox"
-                   className="form-checkbox h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 opacity-0 group-hover:opacity-100 checked:opacity-100 transition-opacity duration-200"
+                   className="form-checkbox h-4 w-4 text-blue-600 border-border rounded focus:ring-blue-500 opacity-0 group-hover:opacity-100 checked:opacity-100 transition-opacity duration-200"
                    onClick={e => e.stopPropagation()}
                    aria-label={`Select connection for ${connection.first_name} ${connection.last_name}`}
                  />
@@ -300,8 +300,8 @@ export default function ConnectionsPage() {
               </div>
 
               {/* Profile Image Placeholder */}
-              <div className="w-16 h-16 bg-gray-200 rounded-xl mx-auto mb-4 flex items-center justify-center">
-                <User className="h-8 w-8 text-gray-400" />
+              <div className="w-16 h-16 bg-foreground rounded-xl mx-auto mb-4 flex items-center justify-center">
+                <User className="h-8 w-8 text-tertiary" />
               </div>
 
 
@@ -315,12 +315,12 @@ export default function ConnectionsPage() {
               {/* Company and Role */}
               <div className="space-y-1 text-center">
                 {connection.job_title && (
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-secondary">
                     {connection.job_title}
                   </p>
                 )}
                 {connection.company && (
-                  <div className="flex items-center justify-center gap-1 text-sm text-gray-600">
+                  <div className="flex items-center justify-center gap-1 text-sm text-secondary">
                     <span>{connection.company}</span>
                   </div>
                 )}

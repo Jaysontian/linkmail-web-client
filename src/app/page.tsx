@@ -59,7 +59,7 @@ export default function Home() {
   const networkerTexts = [
     "crazy networkers",
     "internship searchers", 
-    "relationship engineers",
+    "relationship keepers",
     "people investors",
   ];
 
@@ -87,7 +87,7 @@ export default function Home() {
                 className="h-8 w-8 mr-3"
                 style={{ objectFit: "contain" }}
               />
-              <h1 className="text-xl font-semibold text-primary">Linkmail</h1>
+              <h1 className="text-xl font-semibold font-tiempos-medium text-primary">Linkmail</h1>
             </div>
 
             <div className="flex items-center">
@@ -116,7 +116,7 @@ export default function Home() {
         {/* Left Panel - Callout */}
         <div className="flex-1 flex flex-col justify-center px-8 py-12">
           <div className="max-w-lg text-center">
-            <h1 className="text-5xl font-newsreader-500 font-bold text-primary mb-6 leading-tight">
+            <h1 className="text-5xl font-tiempos-medium font-bold text-primary mb-6 leading-tight">
               Made for the <br></br> <CyclingScrambleText texts={networkerTexts} />.
             </h1>
             <p className="text-lg text-secondary mb-12 leading-relaxed">
@@ -181,7 +181,7 @@ export default function Home() {
       <div className="mx-auto max-w-7xl pt-24 min-h-[calc(100vh-10rem)] flex flex-col items-center justify-center pb-12">
 
         <div className="flex-1 flex flex-col justify-center px-8 py-6 text-center">
-          <h2 className="text-4xl font-bold text-primary mb-6 font-newsreader-500">Networking, but 20x faster.</h2>
+          <h2 className="text-4xl font-bold text-primary mb-6 font-tiempos-medium">Networking, but 20x faster.</h2>
           <p className="max-w-lg text-lg text-secondary mb-12 leading-relaxed">
             Linkmail helps you level up your networking and outreach – find more jobs, outreach more people, send more follow ups.
           </p>
@@ -232,11 +232,11 @@ export default function Home() {
                 },
               ].map((feature, idx) => (
                 <div key={idx} className="my-8 last:mb-0">
-                  <h3 className="text-2xl font-semibold text-primary font-newsreader-500 mb-2 flex items-center gap-2">
+                  <h3 className="text-2xl font-semibold text-primary font-tiempos-regular mb-2 flex items-center gap-2">
                     {feature.icon}
                     {feature.title}
                   </h3>
-                  <p className="text-md text-secondary">{feature.content}</p>
+                  <p className="text-md text-tertiary">{feature.content}</p>
                 </div>
               ))}
             </div>

@@ -104,7 +104,7 @@ export default function TemplatesPage() {
     <div className="max-w-5xl mx-auto py-6 px-6 mt-[100px]">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-newsreader-500 text-primary">Your Templates</h1>
+          <h1 className="text-3xl font-tiempos-medium text-primary">Your Templates</h1>
           <p className="mt-2 text-[15px] max-w-xl text-stone-500">Save and reuse outreach drafts for different purposes. Linkmail will base responses off of these templates.</p>
         </div>
         <button

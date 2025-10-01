@@ -135,7 +135,7 @@ export default function Dashboard() {
 
           {/* Welcome Header */}
           <div className="mb-8">
-            <h1 className="text-4xl font-newsreader-500 text-primary">
+            <h1 className="text-3xl font-tiempos-medium text-primary">
                Welcome, {user?.name?.split(' ')[0] || 'there'}.
             </h1>
           </div>

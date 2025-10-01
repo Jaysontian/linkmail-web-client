@@ -237,25 +237,25 @@ export default function ConnectionDetailPage() {
 
       <button
         onClick={() => router.push('/dashboard/connections')}
-        className="px-2.5 py-1.5 hover:bg-gray-100 rounded-md transition-colors cursor-pointer flex items-center gap-2"
+        className="px-2.5 py-1.5 text-tertiary hover:text-primary hover:bg-hover rounded-md transition-colors cursor-pointer flex items-center gap-2"
       >
-        <ArrowLeft className="h-4 w-4 text-gray-400" />
-        <span className="text-gray-500 text-sm">Back</span>
+        <ArrowLeft className="h-4 w-4" />
+        <span className=" text-sm">Back</span>
       </button>
 
       {/* Header */}
       <div className="mb-8 mt-[50px]">
         
-          <div className="w-24 h-24 bg-gray-200 rounded-xl flex items-center justify-center mb-8">
-            <User className="h-8 w-8 text-gray-400" />
+          <div className="w-24 h-24 bg-foreground rounded-xl flex items-center justify-center mb-8">
+            <User className="h-8 w-8 text-tertiary" />
           </div>
 
           <div className="w-full flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-newsreader-500 text-primary">
+                <h1 className="text-3xl font-tiempos-medium text-primary">
                   {connection.first_name} {connection.last_name}
                 </h1>
-                <p className="text-gray-600 mt-1">
+                <p className="text-secondary mt-4">
                   {connection.job_title && connection.company 
                     ? `${connection.job_title}`
                     : connection.job_title || connection.company || 'Professional Contact'
@@ -267,7 +267,7 @@ export default function ConnectionDetailPage() {
                 {!showNotes && (
                   <button
                     onClick={handleAddNote}
-                    className="flex cursor-pointer items-center gap-2 px-4 py-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 text-sm font-medium transition-colors"
+                    className="flex cursor-pointer items-center gap-2 px-4 py-2 rounded-full bg-foreground hover:bg-foreground/70 text-secondary text-sm font-medium transition-colors"
                     type="button"
                   >
                     <TextAlignJustify className="h-4 w-4" />
@@ -278,24 +278,36 @@ export default function ConnectionDetailPage() {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button
-                      className={`flex cursor-pointer  items-center gap-2 px-4 py-2 text-sm font-medium rounded-full ${statusColors[connection.status]} hover:bg-opacity-90 transition-colors`}
+                      className={`
+                        flex cursor-pointer items-center gap-2 px-4 py-2 text-sm font-medium rounded-full
+                        hover:bg-opacity-90 transition-colors
+                        bg-foreground border border-border text-primary
+                      `}
                       aria-label="Change status"
                       type="button"
                     >
                       {statusLabels[connection.status]}
-                      <ChevronDown className="h-4 w-4 text-gray-400" />
+                      <ChevronDown className="h-4 w-4 text-secondary" />
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuContent
+                    align="end"
+                    className="w-48 bg-[#232322] border border-border shadow-lg"
+                  >
                     {Object.entries(statusLabels).map(([value, label]) => (
                       <DropdownMenuItem
                         key={value}
                         onClick={() => updateConnectionStatus(value)}
-                        className="cursor-pointer"
+                        className="cursor-pointer hover:bg-hover transition-colors"
                       >
                         <div className="flex items-center gap-2">
-                          <div className={`w-3 h-3 rounded-full ${statusColors[value as keyof typeof statusColors].replace('text-', 'bg-').replace('800', '500')}`} />
-                          {label}
+                          <span
+                            className={`
+                              w-3 h-3 rounded-full inline-block
+                              ${statusColors[value as keyof typeof statusColors]}
+                            `}
+                          />
+                          <span className="text-white">{label}</span>
                         </div>
                       </DropdownMenuItem>
                     ))}
@@ -311,14 +323,14 @@ export default function ConnectionDetailPage() {
           
           {/* Notes */}
           {showNotes && (
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
+            <div className="bg-foreground border border-border rounded-2xl p-6">
               <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2 text-sm font-semibold text-gray-400">
+                <div className="flex items-center gap-2 text-sm bg-hover px-2 py-1 rounded-md font-semibold text-tertiary">
                   Notes
                 </div>
                 <button
                   onClick={() => setShowNotes(false)}
-                  className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-sm cursor-pointer"
+                  className="p-1 text-secondary hover:text-primary hover:bg-hover rounded-sm cursor-pointer"
                   title="Hide notes"
                 >
                   <ChevronDown className="h-4 w-4" />
@@ -330,7 +342,7 @@ export default function ConnectionDetailPage() {
                   value={notes}
                   onChange={(e) => handleNotesChange(e.target.value)}
                   placeholder="Add notes about this connection..."
-                  className="w-full min-h-[4rem] text-sm leading-5.5 focus:ring-0 resize-none focus:outline-0 focus:border-transparent text-neutral-600 overflow-hidden"
+                  className="w-full min-h-[4rem] text-sm leading-5.5 focus:ring-0 resize-none focus:outline-0 focus:border-transparent text-secondary overflow-hidden"
                   rows={1}
                   style={{ height: 'auto' }}
                   ref={el => {
@@ -353,13 +365,13 @@ export default function ConnectionDetailPage() {
                         setNotes(originalNotes);
                         setHasUnsavedChanges(false);
                       }}
-                      className="px-3 py-1 bg-neutral-100 text-neutral-600 text-sm rounded-sm hover:bg-neutral-200 cursor-pointer"
+                      className="px-3 py-1 bg-hover text-secondary text-sm rounded-sm hover:bg-selection cursor-pointer"
                     >
                       Cancel
                     </button>
                     <button
                       onClick={updateConnectionNotes}
-                      className="px-3 py-1 bg-neutral-800 text-white text-sm rounded-sm hover:bg-neutral-700 cursor-pointer"
+                      className="px-3 py-1 bg-opposite text-background text-sm rounded-sm cursor-pointer"
                     >
                       Save
                     </button>
@@ -374,28 +386,28 @@ export default function ConnectionDetailPage() {
           <div>
 
             {connection.messages.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">No messages yet</p>
+              <p className="text-secondary text-center py-8">No messages yet</p>
             ) : (
               <div className="space-y-4">
                 {connection.messages.map((message) => (
-                  <div key={message.id} className="bg-white border border-gray-200 rounded-lg p-6">
+                  <div key={message.id} className="bg-foreground border border-border rounded-2xl p-6">
 
                     <div className="flex items-center justify-between mb-4">
                       <span className={`px-2 py-1 text-xs font-medium rounded-md ${
                         message.direction === 'sent' 
-                          ? 'bg-blue-100 text-blue-800' 
-                          : 'bg-green-100 text-green-800'
+                          ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100' 
+                          : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100'
                       }`}>
                         {message.direction === 'sent' ? 'Sent in Gmail' : 'Received'}
                       </span>
-                      <span className="text-sm text-gray-500">
+                      <span className="text-sm text-tertiary">
                         {formatDateTime(message.sent_at)}
                       </span>
                     </div>
 
-                    <h4 className="font-newsreader-600 font-medium text-primary mb-2">{message.subject}</h4>
+                    <h4 className="font-tiempos-medium font-medium text-primary mb-4">{message.subject}</h4>
 
-                    <div className="text-gray-700 font-newsreader-400 leading-relaxed whitespace-pre-wrap">
+                    <div className="text-secondary font-tiempos-regular text-sm leading-relaxed whitespace-pre-wrap">
                       {message.body}
                     </div>
 
@@ -424,7 +436,7 @@ export default function ConnectionDetailPage() {
         <div className="space-y-6">
 
           {/* Profile Card */}
-          <div className="bg-white border border-gray-200 rounded-lg p-6">
+          <div className="bg-foreground border border-border rounded-2xl p-6">
             <div className="flex items-start gap-6">
               {/* Profile Image Placeholder */}
 
@@ -436,21 +448,21 @@ export default function ConnectionDetailPage() {
 
                   
                   {connection.company && (
-                    <div className="flex items-center text-sm gap-2 text-gray-700">
+                    <div className="flex items-center text-sm gap-2 text-secondary">
                       <Briefcase className="h-4 w-4 text-gray-400" />
                       <span>{connection.company}</span>
                     </div>
                   )}
 
                   {connection.primary_email && (
-                    <div className="flex items-center text-sm gap-2 text-gray-700">
+                    <div className="flex items-center text-sm gap-2 text-secondary">
                       <Mail className="h-4 w-4 text-gray-400" />
                       <span>{connection.primary_email}</span>
                     </div>
                   )}
 
                   {(connection.city || connection.state || connection.country) && (
-                    <div className="flex items-center text-sm gap-2 text-gray-700">
+                    <div className="flex items-center text-sm gap-2 text-secondary">
                       <MapPin className="h-4 w-4 text-gray-400" />
                       <span>
                         {[connection.city, connection.state, connection.country]
@@ -479,17 +491,17 @@ export default function ConnectionDetailPage() {
           </div>
 
           {/* Connection Info */}
-          <div className="bg-white border border-gray-200 rounded-lg p-6 text-sm">
+          <div className="bg-foreground border border-border rounded-2xl p-6 text-sm">
             <div className="space-y-3 text-sm">
-              <div className="flex items-center gap-2 text-gray-600">
+              <div className="flex items-center gap-2 text-secondary">
                 <Clock className="h-4 w-4" />
                 <span>Created {formatDate(connection.created_at)}</span>
               </div>
-              <div className="flex items-center gap-2 text-gray-600">
+              <div className="flex items-center gap-2 text-secondary">
                 <Clock className="h-4 w-4" />
                 <span>Updated {formatDate(connection.updated_at)}</span>
               </div>
-              <div className="flex items-center gap-2 text-gray-600">
+              <div className="flex items-center gap-2 text-secondary">
                 <MessageSquare className="h-4 w-4" />
                 <span>{connection.messages.length} message{connection.messages.length !== 1 ? 's' : ''}</span>
               </div>
