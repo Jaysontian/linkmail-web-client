@@ -36,12 +36,12 @@ export function useUserProfile() {
       setIsLoading(true);
       setError(null);
       
-      console.log('Fetching profile with token:', apiClient.token ? 'present' : 'missing');
+      console.log('Fetching profile with token:', apiClient.hasToken() ? 'present' : 'missing');
       const response = await apiClient.getUserBio();
       console.log('Profile fetch response:', response);
       
-      if (response.success && response.data?.success) {
-        setProfile(response.data.profile);
+      if (response.success && (response.data as any)?.success) {
+        setProfile((response.data as any).profile);
       } else {
         setError(response.error || 'Failed to fetch profile');
       }
@@ -57,13 +57,13 @@ export function useUserProfile() {
     try {
       setError(null);
       
-      console.log('Updating profile with token:', apiClient.token ? 'present' : 'missing');
+      console.log('Updating profile with token:', apiClient.hasToken() ? 'present' : 'missing');
       console.log('Profile data:', profileData);
       const response = await apiClient.updateUserBio(profileData);
       console.log('Profile update response:', response);
       
-      if (response.success && response.data?.success) {
-        setProfile(response.data.profile);
+      if (response.success && (response.data as any)?.success) {
+        setProfile((response.data as any).profile);
         return { success: true };
       } else {
         setError(response.error || 'Failed to update profile');

@@ -20,6 +20,10 @@ class ApiClient {
     console.log('API client token set:', token ? 'present' : 'null');
   }
 
+  hasToken(): boolean {
+    return this.token !== null;
+  }
+
   private async request<T>(
     endpoint: string,
     options: RequestInit = {}
