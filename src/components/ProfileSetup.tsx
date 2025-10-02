@@ -54,7 +54,7 @@ export function ProfileSetup({ profile, setupStatus, onProfileUpdate }: ProfileS
   const addExperience = () => {
     setFormData(prev => ({
       ...prev,
-      experiences: [...prev.experiences, { title: '', company: '', duration: '' }]
+      experiences: [...prev.experiences, { title: '', company: '', description: '' }]
     }));
   };
 
@@ -207,8 +207,8 @@ export function ProfileSetup({ profile, setupStatus, onProfileUpdate }: ProfileS
                       </div>
                       <input
                         type="text"
-                        value={exp.duration || ''}
-                        onChange={(e) => updateExperience(index, 'duration', e.target.value)}
+                        value={exp.description || ''}
+                        onChange={(e) => updateExperience(index, 'description', e.target.value)}
                         placeholder="Duration (e.g., Jan 2020 - Present)"
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
                       />

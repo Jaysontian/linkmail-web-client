@@ -109,7 +109,7 @@ export default function ProfilePage() {
   const addExperience = () => {
     setFormData(prev => ({
       ...prev,
-      experiences: [...prev.experiences, { title: '', company: '', duration: '' }]
+      experiences: [...prev.experiences, { title: '', company: '', description: '' }]
     }));
   };
 
@@ -244,7 +244,7 @@ export default function ProfilePage() {
       experiences: (data.experiences || []).map((exp: any) => ({
         title: exp.title || '',
         company: exp.company || '',
-        duration: exp.duration || ''
+        description: exp.description || ''
       })),
       skills: (data.skills || []).slice(),
       school: data.school || '',
@@ -561,8 +561,8 @@ export default function ProfilePage() {
                       <div>
                         <label className="block text-xs text-tertiary mb-2 mt-4">Details</label>
                         <textarea
-                          value={exp.duration || ''}
-                          onChange={(e) => updateExperience(index, 'duration', e.target.value)}
+                          value={exp.description || ''}
+                          onChange={(e) => updateExperience(index, 'description', e.target.value)}
                           placeholder="A/B tested chip-to-dip ratios; increased crunch satisfaction by 42%"
                           className="w-full px-3 py-2 text-sm bg-foreground border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-primary placeholder:text-tertiary"
                           rows={3}
