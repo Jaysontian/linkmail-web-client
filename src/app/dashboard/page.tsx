@@ -6,7 +6,8 @@ import { useUserProfile } from '@/hooks/useUserProfile';
 import { useRouter } from 'next/navigation';
 import { LoginButton } from '@/components/LoginButton';
 import { ProfileSetup } from '@/components/ProfileSetup';
-import { ChevronRight, X, Download, BookOpen } from 'lucide-react';
+import { Tutorial } from '@/components/Tutorial';
+import { ChevronRight, Download, BookOpen } from 'lucide-react';
 
 export default function Dashboard() {
   const { user, isLoading, isAuthenticated } = useAuth();
@@ -90,48 +91,10 @@ export default function Dashboard() {
 
 
           {/* Extension Modal */}
-          {showExtensionCallout && (
-            <>
-              <div className="fixed inset-0 bg-black/50 backdrop-blur-[2px] z-50" onClick={handleDismissExtensionCallout} />
-              <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                <div role="dialog" aria-modal="true" className="w-full max-w-md rounded-xl border border-border bg-foreground shadow-xl">
-                  <div className="p-4 flex items-start justify-between">
-                    <div className="pr-6">
-                      <h3 className="text-base font-semibold text-primary">Install the Linkmail extension</h3>
-                      <p className="mt-1 text-sm text-secondary">
-                        Use Linkmail directly on LinkedIn profiles and inbox to send instantly.
-                      </p>
-                    </div>
-                    <button aria-label="Close" onClick={handleDismissExtensionCallout} className="p-1 rounded-md hover:bg-hover cursor-pointer">
-                      <X className="h-5 w-5 text-secondary" />
-                    </button>
-                  </div>
-                  <div className="px-4 pb-4">
-                    <div className="flex flex-col sm:flex-row gap-2">
-                      <a
-                        href="https://chrome.google.com/webstore/category/extensions"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-amber-600 text-white text-sm font-medium hover:bg-amber-700 transition-colors cursor-pointer flex-1"
-                        onClick={handleDismissExtensionCallout}
-                      >
-                        <Download className="h-4 w-4" /> Install for Chrome
-                      </a>
-                      <a
-                        href="https://addons.mozilla.org/en-US/firefox/extensions/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-hover text-primary text-sm font-medium hover:bg-selection transition-colors cursor-pointer flex-1"
-                        onClick={handleDismissExtensionCallout}
-                      >
-                        Install for Firefox
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
+          <Tutorial 
+            showExtensionCallout={showExtensionCallout} 
+            onDismiss={handleDismissExtensionCallout} 
+          />
 
           {/* Welcome Header */}
           <div className="mb-8">
@@ -188,7 +151,7 @@ export default function Dashboard() {
           {/* Getting Started Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {/* Install Extension Card */}
-            <div className="bg-foreground overflow-hidden border border-border rounded-lg">
+            <div className="bg-foreground overflow-hidden border border-border rounded-2xl">
               <div className="px-4 py-5 sm:p-6">
                 <div className="flex items-start justify-between mb-2">
                   <h3 className="text-lg leading-6 font-medium text-primary">Install the Extension</h3>
@@ -197,50 +160,34 @@ export default function Dashboard() {
                   Use Linkmail directly on LinkedIn profiles and inbox to send instantly.
                 </p>
                 <div className="mt-4 flex gap-2">
-                  <button
-                    onClick={() => setShowExtensionCallout(true)}
+                  <a
+                    href="https://chromewebstore.google.com/detail/linkmail/jkidcmbkofimgdindkagdpdcioighhji"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-600 text-white text-sm hover:bg-amber-700 transition-colors cursor-pointer"
                   >
                     <Download className="h-4 w-4" /> Install extension
-                  </button>
-                  <a
-                    href="https://chrome.google.com/webstore/category/extensions"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-hover text-primary text-sm hover:bg-selection transition-colors cursor-pointer"
-                  >
-                    Open Web Store
                   </a>
                 </div>
               </div>
             </div>
 
             {/* Learn / Docs Card */}
-            <div className="bg-foreground overflow-hidden border border-border rounded-lg">
+            <div className="bg-foreground overflow-hidden border border-border rounded-2xl">
               <div className="px-4 py-5 sm:p-6">
                 <div className="flex items-start justify-between mb-2">
                   <h3 className="text-lg leading-6 font-medium text-primary">Learn about Linkmail</h3>
                 </div>
                 <p className="text-sm text-secondary">
-                  Get started with best practices and examples. Read the docs to learn how to craft great outreach and automate your workflow.
+                  Get started with best practices and examples. Learn how Linkmail works and how to craft great outreach and automate your workflow.
                 </p>
                 <div className="mt-4 flex gap-2">
-                  <a
-                    href="https://linkmail.app/docs"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    onClick={() => setShowExtensionCallout(true)}
                     className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700 transition-colors cursor-pointer"
                   >
-                    <BookOpen className="h-4 w-4" /> Read the docs
-                  </a>
-                  <a
-                    href="https://linkmail.app/learn"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-hover text-primary text-sm hover:bg-selection transition-colors cursor-pointer"
-                  >
-                    Guides & tips
-                  </a>
+                    <BookOpen className="h-4 w-4" />How It Works
+                  </button>
                 </div>
               </div>
             </div>
