@@ -249,7 +249,7 @@ export default function Home() {
 
     </div>
 
-    <footer className="w-full bg-black text-white py-10 mt-12">
+    <footer className="w-full bg-black text-white px-12 py-10 mt-12">
       <div className="mx-auto max-w-7xl flex flex-col md:flex-row items-center justify-between gap-4 px-4">
         {/* Left: Logo and name */}
         <div className="flex items-center gap-4">

@@ -91,7 +91,7 @@ export default function TemplatesPage() {
   if (isLoading || profileLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -101,28 +101,33 @@ export default function TemplatesPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto py-6 px-6 mt-[100px]">
+    <div className="max-w-3xl mx-auto py-6 px-6 mt-[100px]">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-tiempos-medium text-primary">Your Templates</h1>
-          <p className="mt-2 text-[15px] max-w-xl text-stone-500">Save and reuse outreach drafts for different purposes. Linkmail will base responses off of these templates.</p>
+          <h1 className="text-3xl font-tiempos-medium text-primary">Templates</h1>
+          <p className="mt-6 text-[15px] max-w-lg text-tertiary">Save and reuse outreach drafts for different purposes. Linkmail will base responses off of these templates.</p>
         </div>
-        <button
+        {templates.length !== 0 && <button
           onClick={() => openEditor(null)}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 cursor-pointer"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-background text-sm font-medium hover:bg-primary/90 cursor-pointer"
         >
           <Plus className="w-4 h-4" /> New Template
-        </button>
+        </button>}
       </div>
 
       {templates.length === 0 ? (
-        <div className="bg-transparent border border-black/10 rounded-2xl p-10 text-center">
-          <div className="mx-auto w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4">📝</div>
+        <div className="bg-background border border-border rounded-3xl p-10 pb-20 text-center">
+          <img
+            src="/empty.png"
+            alt="No templates"
+            className="mx-auto my-10 w-20 h-20 opacity-70"
+            style={{ objectFit: "contain" }}
+          />
           <h3 className="text-lg font-medium text-primary mb-2">No templates yet</h3>
-          <p className="text-sm text-gray-600 mb-4">Create your first template to speed up outreach.</p>
+          <p className="text-sm text-tertiary mb-4">Create your first template to speed up outreach.</p>
           <button
             onClick={() => openEditor(null)}
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 cursor-pointer text-sm"
+            className="my-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg font-medium bg-primary text-background cursor-pointer text-sm"
           >
             <Plus className="w-4 h-4" /> Create Template
           </button>
@@ -130,26 +135,26 @@ export default function TemplatesPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {templates.map((t, i) => (
-            <div key={i} className="group bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition cursor-pointer" onClick={() => openEditor(i)}>
+            <div key={i} className="group bg-foreground border border-border rounded-xl p-4 shadow-sm hover:shadow-md transition cursor-pointer" onClick={() => openEditor(i)}>
               <div className="flex items-start justify-between mb-3">
                 <div className="text-2xl leading-none">{t.icon || '📝'}</div>
                 <button
                   onClick={(e) => { e.stopPropagation(); handleDelete(i); }}
-                  className="p-1 text-gray-400 hover:text-red-600 rounded-md hover:bg-red-50"
+                  className="p-1 text-tertiary hover:text-red-500 cursor-pointer rounded-md hover:bg-red-500/10"
                   aria-label="Delete template"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
-              <div className="mb-2 font-medium text-gray-900 line-clamp-1">{t.title || 'Untitled'}</div>
-              <div className="text-sm text-gray-600 line-clamp-4 whitespace-pre-wrap">{t.body}</div>
+              <div className="mb-4 font-medium text-primary line-clamp-1">{t.title || 'Untitled'}</div>
+              <div className="text-xs text-tertiary line-clamp-4 whitespace-pre-wrap">{t.body}</div>
               {t.fileUrl && (
                 <a
                   href={t.fileUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
-                  className="inline-flex items-center gap-1 text-xs mt-3 text-blue-700 hover:underline"
+                  className="inline-flex items-center gap-1 text-xs mt-3 text-primary hover:underline"
                 >
                   Attachment
                   <Edit3 className="w-3 h-3" />
@@ -168,9 +173,9 @@ export default function TemplatesPage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <div className="absolute inset-0 bg-black/40" onClick={closeEditor} />
+            <div className="absolute inset-0 bg-black/60" onClick={closeEditor} />
             <motion.div
-              className="relative bg-white w-full max-w-2xl mx-4 rounded-2xl shadow-xl border border-gray-200"
+              className="relative bg-background w-full max-w-2xl mx-4 rounded-2xl shadow-xl border border-border"
               initial={{ scale: 0.95, y: 10, opacity: 0 }}
               animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{ scale: 0.98, y: 6, opacity: 0 }}
@@ -179,66 +184,65 @@ export default function TemplatesPage() {
               <div className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h3 className="text-xl font-semibold text-primary">{selectedIndex === null ? 'New Template' : 'Edit Template'}</h3>
-                    <p className="text-sm text-gray-500 mt-1">Use placeholders like [Recipient Name].</p>
+                    <h3 className="text-2xl font-tiempos-medium text-primary">{selectedIndex === null ? 'New Template' : 'Edit Template'}</h3>
                   </div>
-                  <button onClick={closeEditor} className="p-2 rounded-lg hover:bg-gray-100 cursor-pointer">
-                    <X className="w-5 h-5 text-gray-500" />
+                  <button onClick={closeEditor} className="p-2 rounded-lg hover:bg-hover cursor-pointer">
+                    <X className="w-4 h-4 text-tertiary" />
                   </button>
                 </div>
 
                 <div className="grid grid-cols-1 gap-4">
                   <div>
-                    <label className="block text-sm text-gray-600 mb-2">Icon</label>
+                    <label className="block text-sm text-secondary mb-2">Icon</label>
                     <input
                       type="text"
                       maxLength={2}
                       value={draft.icon || ''}
                       onChange={(e) => setDraft({ ...(draft as TemplateItem), icon: e.target.value })}
                       placeholder="e.g. 🔎"
-                      className="w-24 px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-24 px-3 py-2 text-sm text-primary bg-foreground border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm text-gray-600 mb-2">Title</label>
+                    <label className="block text-sm text-secondary mb-2">Title</label>
                     <input
                       type="text"
                       value={draft.title}
                       onChange={(e) => setDraft({ ...(draft as TemplateItem), title: e.target.value })}
                       placeholder="Short Reach Out"
-                      className="w-full px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 text-sm text-primary bg-foreground border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm text-gray-600 mb-2">Body</label>
+                    <label className="block text-sm text-secondary mb-2">Body</label>
                     <textarea
                       rows={10}
                       value={draft.body}
                       onChange={(e) => setDraft({ ...(draft as TemplateItem), body: e.target.value })}
                       placeholder={'Hi [Recipient Name], I\'m a 3rd year Computer Science student at UCLA...'}
-                      className="w-full px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 whitespace-pre-wrap"
+                      className="w-full px-3 py-2 text-sm text-primary bg-foreground border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary whitespace-pre-wrap"
                     />
                   </div>
 
                   {/* Optional attachment URL field; file uploads can be added later */}
                   <div>
-                    <label className="block text-sm text-gray-600 mb-2">Attachment URL (optional)</label>
+                    <label className="block text-sm text-secondary mb-2">Attachment URL (optional)</label>
                     <input
                       type="url"
                       value={draft.fileUrl || ''}
                       onChange={(e) => setDraft({ ...(draft as TemplateItem), fileUrl: e.target.value })}
                       placeholder="https://..."
-                      className="w-full px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 text-sm text-primary bg-foreground border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between my-8">
-                  <label htmlFor="strict-template-toggle" className="text-sm text-gray-700">
+                  <label htmlFor="strict-template-toggle" className="text-sm text-secondary">
                     <span className="font-medium">Precise Mode</span>
-                    <span className="block my-2 text-gray-500 font-light">Strictly use the template as written and don’t modify or try to improve the message.</span>
+                    <span className="block my-2 text-tertiary font-light">Strictly use the template as written and don't modify or try to improve the message.</span>
                   </label>
                   <button
                     id="strict-template-toggle"
@@ -246,7 +250,7 @@ export default function TemplatesPage() {
                     role="switch"
                     aria-checked={!!draft.strict_template}
                     onClick={() => setDraft({ ...(draft as TemplateItem), strict_template: !draft?.strict_template })}
-                    className={`${draft?.strict_template ? 'bg-blue-600' : 'bg-gray-300'} relative inline-flex h-7 w-11 cursor-pointer items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
+                    className={`${draft?.strict_template ? 'bg-blue-500' : 'bg-tertiary'} relative inline-flex h-7 w-11 cursor-pointer items-center rounded-full transition-colors focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-foreground`}
                   >
                     <span className="sr-only">Toggle strict template</span>
                     <span
@@ -259,14 +263,14 @@ export default function TemplatesPage() {
                 <div className="flex items-center justify-end gap-3 mt-6">
                   <button
                     onClick={closeEditor}
-                    className="px-4 py-2 rounded-full border border-gray-300 text-gray-700 text-sm hover:bg-gray-50 cursor-pointer"
+                    className="px-4 py-2 rounded-xl border border-border text-secondary text-sm hover:bg-hover cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleSave}
                     disabled={isSaving}
-                    className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:bg-blue-400 cursor-pointer"
+                    className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-primary text-background text-sm font-medium hover:bg-primary/90 disabled:bg-primary/50 cursor-pointer"
                   >
                     <Save className="w-4 h-4" /> {isSaving ? 'Saving...' : 'Save Template'}
                   </button>

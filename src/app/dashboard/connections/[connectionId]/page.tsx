@@ -246,7 +246,7 @@ export default function ConnectionDetailPage() {
       {/* Header */}
       <div className="mb-8 mt-[50px]">
         
-          <div className="w-24 h-24 bg-foreground rounded-xl flex items-center justify-center mb-8">
+          <div className="w-24 h-24 bg-hover rounded-xl flex items-center justify-center mb-8">
             <User className="h-8 w-8 text-tertiary" />
           </div>
 

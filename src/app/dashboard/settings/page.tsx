@@ -4,13 +4,13 @@ import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, CreditCard, Sun, Moon } from 'lucide-react';
-import ThemeToggle from '@/components/ThemeToggle';
+import { User, CreditCard } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
+import Image from 'next/image';
 
 export default function SettingsPage() {
   const { user, isLoading, isAuthenticated } = useAuth();
-  const { theme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('general');
 
@@ -93,10 +93,10 @@ export default function SettingsPage() {
                       <div className="space-y-6">
                         {/* Email Section */}
                         <div>
-                          <p className="block text-sm text-secondary mb-1 font-medium">
+                          <p className="block text-md text-secondary mb-1 font-medium">
                             Email Address
                           </p>
-                          <p className="mt-2 text-xs text-tertiary mb-4">
+                          <p className="mt-2 text-sm text-tertiary mb-4">
                             This is your primary email address used for account authentication.
                           </p>
                           <div className="relative">
@@ -104,7 +104,7 @@ export default function SettingsPage() {
                               type="email"
                               value={user?.email || ''}
                               disabled
-                              className="w-full px-3 py-2 text-sm bg-foreground text-secondary border border-border rounded-lg opacity-75 cursor-not-allowed"
+                              className="w-full px-3 py-2 text-md bg-foreground text-secondary border border-border rounded-lg opacity-75 cursor-not-allowed"
                             />
                             <div className="absolute inset-y-0 right-0 flex items-center pr-3">
                               <span className="text-xs text-primary bg-background px-2 py-1 rounded border border-border">
@@ -117,77 +117,93 @@ export default function SettingsPage() {
                         {/* Account Information */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-sm font-normal text-secondary mb-3">
+                            <label className="block text-md font-normal text-secondary mb-3">
                               First Name
                             </label>
                             <input
                               type="text"
                               value={user?.name?.split(' ')[0] || ''}
                               disabled
-                              className="w-full px-3 py-2 text-sm bg-foreground text-secondary border border-border rounded-lg opacity-75 cursor-not-allowed"
+                              className="w-full px-3 py-2 text-md bg-foreground text-secondary border border-border rounded-lg opacity-75 cursor-not-allowed"
                             />
                           </div>
                           <div>
-                            <label className="block text-sm font-normal text-secondary mb-3">
+                            <label className="block text-md font-normal text-secondary mb-3">
                               Last Name
                             </label>
                             <input
                               type="text"
                               value={user?.name?.split(' ').slice(1).join(' ') || ''}
                               disabled
-                              className="w-full px-3 py-2 text-sm bg-foreground text-secondary border border-border rounded-lg opacity-75 cursor-not-allowed"
+                              className="w-full px-3 py-2 text-md bg-foreground text-secondary border border-border rounded-lg opacity-75 cursor-not-allowed"
                             />
                           </div>
                         </div>
 
                         {/* Theme Settings */}
                         <div>
-                          <label className="block text-sm font-normal text-secondary mb-3">
-                            Theme Preference
+                          <label className="block text-md font-normal text-secondary mt-8 mb-2">
+                            Choose Your Theme
                           </label>
-                          <div className="flex items-center justify-between p-4 bg-foreground border border-border rounded-lg">
-                            <div className="flex items-center space-x-3">
-                              <div className="flex-shrink-0">
-                                {theme === 'dark' ? (
-                                  <Moon className="h-5 w-5 text-tertiary" />
-                                ) : (
-                                  <Sun className="h-5 w-5 text-yellow-500" />
-                                )}
-                              </div>
-                              <div>
-                                <h4 className="text-sm font-medium text-primary">
-                                  {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
-                                </h4>
-                                <p className="text-xs text-tertiary">
-                                  {theme === 'dark' 
-                                    ? 'Switch to light mode for a brighter interface' 
-                                    : 'Switch to dark mode for better viewing in low light'
-                                  }
-                                </p>
-                              </div>
+                          <p className="text-sm mb-4 text-tertiary">
+                            Select your preferred interface appearance
+                          </p>
+                          <div className="flex gap-4">
+                              {/* Light Theme Option */}
+                              <button
+                                onClick={() => setTheme('light')}
+                                className="relative p-2 rounded-lg transition-all duration-200 cursor-pointer"
+                              >
+                                <div
+                                  className={`
+                                    w-64 h-32 relative rounded-xl overflow-hidden border-2 transition-all duration-200
+                                    ${theme === 'light'
+                                      ? 'border-accent-light'
+                                      : 'border-border hover:border-border'}
+                                  `}
+                                >
+                                  <Image
+                                    src="/light.png"
+                                    alt="Light Theme"
+                                    fill
+                                    className="object-cover"
+                                  />
+                                </div>
+                                <div className="mt-2 text-center">
+                                  <span className="text-xs font-medium text-secondary">Light</span>
+                                </div>
+                              </button>
+
+                              {/* Dark Theme Option */}
+                              <button
+                                onClick={() => setTheme('dark')}
+                                className={`
+                                  relative p-2 rounded-lg transition-all duration-200 cursor-pointer
+                                `}
+                              >
+                                <div
+                                  className={`
+                                    w-64 h-32 relative rounded-xl overflow-hidden border-2 transition-all duration-200
+                                    ${theme === 'dark'
+                                      ? 'border-accent-light'
+                                      : 'border-border hover:border-border'}
+                                  `}
+                                >
+                                  <Image
+                                    src="/dark.png"
+                                    alt="Dark Theme"
+                                    fill
+                                    className="object-cover"
+                                  />
+                                </div>
+                                <div className="mt-2 text-center">
+                                  <span className="text-xs font-medium text-secondary">Dark</span>
+                                </div>
+                              </button>
                             </div>
-                            <ThemeToggle />
-                          </div>
                         </div>
 
-                        {/* Account Status */}
-                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                          <div className="flex items-start">
-                            <div className="flex-shrink-0">
-                              <svg className="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                              </svg>
-                            </div>
-                            <div className="ml-3">
-                              <h4 className="text-sm font-medium text-green-800">
-                                Account Verified
-                              </h4>
-                              <div className="mt-2 text-sm text-green-700">
-                                <p>Your email address has been verified and your account is active.</p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+                        
                       </div>
                     </div>
                   )}
@@ -204,13 +220,13 @@ export default function SettingsPage() {
                       </div>
 
                       <div className="text-center py-12">
-                        <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                          <CreditCard className="w-12 h-12 text-gray-400" />
+                        <div className="mx-auto w-24 h-24 bg-foreground rounded-full flex items-center justify-center mb-4">
+                          <CreditCard className="w-12 h-12 text-secondary" />
                         </div>
                         <h3 className="text-lg font-medium text-primary mb-2">
                           Subscription Management
                         </h3>
-                        <p className="text-gray-500 max-w-md mx-auto">
+                        <p className="text-tertiary max-w-md mx-auto">
                           Subscription features will be available soon. Check back later to manage your plan and billing.
                         </p>
                       </div>

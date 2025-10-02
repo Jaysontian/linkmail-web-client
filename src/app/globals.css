@@ -91,6 +91,8 @@
   --color-tertiary: #8e8e8e;
   --color-border: #00000015;
   --color-opposite: #000000;
+  --color-accent: #0B66C2;
+  --color-accent-light: #2B8AEF;
 }
 
 @layer base {
@@ -105,6 +107,8 @@
     --color-tertiary: #606060;
     --color-border: #4e4e4e97;
     --color-opposite: #ffffff;
+    --color-accent: #0B66C2;
+    --color-accent-light: #2B8AEF;
   }
 }
 
