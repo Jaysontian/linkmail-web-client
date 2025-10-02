@@ -1,3 +1,4 @@
+import Link from "next/link";
 export const metadata = {
   title: "Privacy Policy | LinkMail",
   description:
@@ -9,14 +10,14 @@ export default function PrivacyPolicyPage() {
     <main className="text-secondary font-tiempos-regular mx-auto max-w-3xl px-6 py-12 prose prose-invert prose-headings:font-semibold">
       
       <div className="fixed top-6 left-6 flex items-center mb-8 cursor-pointer">
-        <a href="/">
+        <Link href="/">
           <img
             src="/logo.png"
             alt="LinkMail Logo"
             className="h-10 w-8 mr-10"
             style={{ objectFit: "contain" }}
           />
-        </a>
+        </Link>
       </div>
       
       <h1 className="text-primary font-tiempos-medium text-3xl mt-12">Privacy Policy</h1>
@@ -24,7 +25,7 @@ export default function PrivacyPolicyPage() {
 
       <h2 className="my-8 text-primary font-tiempos-medium text-xl">Introduction</h2>
       <p>
-        LinkMail ("we", "our", or "us") is committed to protecting your privacy. This
+        LinkMail (&quot;we&quot;, &quot;our&quot;, or &quot;us&quot;) is committed to protecting your privacy. This
         Privacy Policy explains how we collect, use, and safeguard your information when
         you use our Chrome extension.
       </p>
@@ -109,7 +110,7 @@ export default function PrivacyPolicyPage() {
       <h2 className="my-8 text-primary font-tiempos-medium text-xl">Changes to This Privacy Policy</h2>
       <p>
         We may update our Privacy Policy from time to time. We will notify you of any changes by
-        posting the new Privacy Policy on this page and updating the "Last Updated" date.
+        posting the new Privacy Policy on this page and updating the &quot;Last Updated&quot; date.
       </p>
 
       <h2 className="my-8 text-primary font-tiempos-medium text-xl">Contact Us</h2>
