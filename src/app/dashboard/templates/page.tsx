@@ -242,7 +242,7 @@ export default function TemplatesPage() {
                 <div className="flex items-center justify-between my-8">
                   <label htmlFor="strict-template-toggle" className="text-sm text-secondary">
                     <span className="font-medium">Precise Mode</span>
-                    <span className="block my-2 text-tertiary font-light">Strictly use the template as written and don't modify or try to improve the message.</span>
+                    <span className="block my-2 text-tertiary font-light">Strictly use the template as written and don&apos;t modify or try to improve the message.</span>
                   </label>
                   <button
                     id="strict-template-toggle"
