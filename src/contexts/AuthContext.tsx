@@ -41,7 +41,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (urlToken) {
           // Store token and clear URL
           localStorage.setItem('linkmail_token', urlToken);
-          window.history.replaceState({}, document.title, window.location.pathname);
+          // Clean pathname by removing any whitespace characters (including newlines)
+          const cleanPath = window.location.pathname.replace(/[\n\r\t]/g, '');
+          window.history.replaceState({}, document.title, cleanPath);
           await login(urlToken);
           return;
         }
