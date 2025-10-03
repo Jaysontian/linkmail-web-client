@@ -36,9 +36,9 @@ class ApiClient {
 
     if (this.token) {
       headers.Authorization = `Bearer ${this.token}`;
-      console.log('Adding Authorization header with token');
+      console.log('[ApiClient] Adding Authorization header with token');
     } else {
-      console.log('No token available for request');
+      console.log('[ApiClient] WARNING: No token available for request');
     }
 
     // Merge with existing headers
@@ -46,13 +46,23 @@ class ApiClient {
       Object.assign(headers, options.headers);
     }
 
+    console.log('[ApiClient] Making request:', {
+      url,
+      method: options.method || 'GET',
+      hasAuth: !!this.token,
+      headers: { ...headers, Authorization: this.token ? 'Bearer [REDACTED]' : undefined }
+    });
+
     try {
       const response = await fetch(url, {
         ...options,
         headers,
       });
 
+      console.log('[ApiClient] Response status:', response.status, response.statusText);
+
       const data = await response.json();
+      console.log('[ApiClient] Response data:', data);
 
       if (!response.ok) {
         return {
@@ -67,7 +77,7 @@ class ApiClient {
         data,
       };
     } catch (error) {
-      console.error('API request failed:', error);
+      console.error('[ApiClient] API request failed:', error);
       return {
         success: false,
         error: 'Network error',
@@ -91,7 +101,10 @@ class ApiClient {
   }
 
   async getUserBio() {
-    return this.request('/api/user/bio');
+    console.log('[ApiClient] getUserBio - Token available:', this.hasToken());
+    const response = await this.request('/api/user/bio');
+    console.log('[ApiClient] getUserBio - Response:', response);
+    return response;
   }
 
   async updateUserProfile(profileData: any) {

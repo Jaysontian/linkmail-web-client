@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/api';
+import { useAuth } from '@/hooks/useAuth';
 
 export interface UserProfile {
   user_id: string;
@@ -27,6 +28,7 @@ export interface ProfileSetupStatus {
 }
 
 export function useUserProfile() {
+  const { token, isLoading: authLoading, isAuthenticated } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -36,18 +38,31 @@ export function useUserProfile() {
       setIsLoading(true);
       setError(null);
       
-      console.log('Fetching profile with token:', apiClient.hasToken() ? 'present' : 'missing');
+      console.log('[useUserProfile] Fetching profile with token:', apiClient.hasToken() ? 'present' : 'missing');
+      console.log('[useUserProfile] Current auth state:', { isAuthenticated, token: token ? 'present' : 'null' });
+      
       const response = await apiClient.getUserBio();
-      console.log('Profile fetch response:', response);
+      console.log('[useUserProfile] Profile fetch response:', response);
+      console.log('[useUserProfile] Response data structure:', {
+        success: response.success,
+        hasData: !!response.data,
+        dataSuccess: (response.data as any)?.success,
+        hasProfile: !!(response.data as any)?.profile,
+        profileData: (response.data as any)?.profile
+      });
       
       if (response.success && (response.data as any)?.success) {
-        setProfile((response.data as any).profile);
+        const profileData = (response.data as any).profile;
+        console.log('[useUserProfile] Setting profile data:', profileData);
+        setProfile(profileData);
       } else {
-        setError(response.error || 'Failed to fetch profile');
+        const errorMsg = response.error || 'Failed to fetch profile';
+        console.error('[useUserProfile] Failed to fetch profile:', errorMsg, response);
+        setError(errorMsg);
       }
     } catch (err) {
       setError('Network error while fetching profile');
-      console.error('Error fetching user profile:', err);
+      console.error('[useUserProfile] Error fetching user profile:', err);
     } finally {
       setIsLoading(false);
     }
@@ -121,8 +136,15 @@ export function useUserProfile() {
   };
 
   useEffect(() => {
-    fetchProfile();
-  }, []);
+    // Only fetch profile when auth is ready and user is authenticated
+    if (!authLoading && isAuthenticated && token) {
+      console.log('Auth ready, fetching profile...');
+      fetchProfile();
+    } else if (!authLoading && !isAuthenticated) {
+      // Auth check complete but not authenticated
+      setIsLoading(false);
+    }
+  }, [authLoading, isAuthenticated, token]);
 
   return {
     profile,
