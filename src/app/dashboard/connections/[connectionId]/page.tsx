@@ -61,6 +61,7 @@ interface Connection {
   city: string | null;
   state: string | null;
   country: string | null;
+  profile_picture_url: string | null;
 }
 
 const statusColors = {
@@ -246,8 +247,27 @@ export default function ConnectionDetailPage() {
       {/* Header */}
       <div className="mb-8 mt-[50px]">
         
-          <div className="w-24 h-24 bg-hover rounded-xl flex items-center justify-center mb-8">
-            <User className="h-8 w-8 text-tertiary" />
+          <div className="w-24 h-24 bg-hover rounded-xl flex items-center justify-center mb-8 overflow-hidden">
+            {connection.profile_picture_url ? (
+              <img 
+                src={connection.profile_picture_url} 
+                alt={`${connection.first_name} ${connection.last_name}`}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  // Fallback to User icon if image fails to load
+                  e.currentTarget.style.display = 'none';
+                  const parent = e.currentTarget.parentElement;
+                  if (parent && !parent.querySelector('.fallback-icon')) {
+                    const icon = document.createElement('div');
+                    icon.className = 'fallback-icon w-full h-full flex items-center justify-center';
+                    icon.innerHTML = '<svg class="h-8 w-8 text-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>';
+                    parent.appendChild(icon);
+                  }
+                }}
+              />
+            ) : (
+              <User className="h-8 w-8 text-tertiary" />
+            )}
           </div>
 
           <div className="w-full flex items-center justify-between">
