@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { MessageSquare, User, Building, Search, Ellipsis, Edit, Trash2, Archive, Flag, MoreHorizontal } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
 import { apiClient } from '@/lib/api';
 import {
   ContextMenu,
@@ -61,6 +62,7 @@ const statusLabels = {
 };
 
 export default function ConnectionsPage() {
+  const { user, isLoading, isAuthenticated } = useAuth();
   const router = useRouter();
   const [connections, setConnections] = useState<Connection[]>([]);
   const [loading, setLoading] = useState(true);
@@ -69,8 +71,16 @@ export default function ConnectionsPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
   useEffect(() => {
-    fetchConnections();
-  }, []);
+    if (!isLoading && !isAuthenticated) {
+      router.push('/');
+    }
+  }, [isLoading, isAuthenticated, router]);
+
+  useEffect(() => {
+    if (isAuthenticated && !isLoading) {
+      fetchConnections();
+    }
+  }, [isAuthenticated, isLoading]);
 
   const fetchConnections = async () => {
     try {
@@ -125,19 +135,16 @@ export default function ConnectionsPage() {
   };
 
 
-  if (loading) {
+  if (isLoading || loading) {
     return (
-      <div className="p-6">
-        <div className="animate-pulse">
-          <div className="h-8 bg-foreground rounded w-1/4 mb-6"></div>
-          <div className="space-y-4">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-20 bg-foreground rounded"></div>
-            ))}
-          </div>
-        </div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
       </div>
     );
+  }
+
+  if (!isAuthenticated) {
+    return null; // Will redirect in useEffect
   }
 
   if (error) {
