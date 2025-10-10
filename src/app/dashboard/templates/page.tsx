@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Plus, X, Save, Trash2, Edit3 } from 'lucide-react';
+import { FileUpload } from '@/components/ui/file-upload';
+import { apiClient } from '@/lib/api';
 
 type TemplateItem = {
   icon?: string;
@@ -25,6 +27,8 @@ export default function TemplatesPage() {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [draft, setDraft] = useState<TemplateItem | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -57,17 +61,36 @@ export default function TemplatesPage() {
   const closeEditor = () => {
     setSelectedIndex(null);
     setDraft(null);
+    setUploadedFile(null);
   };
 
   const handleSave = async () => {
     if (!draft) return;
     setIsSaving(true);
+    
     try {
+      let templateToSave = { ...draft };
+
+      // Upload file if there's a new file selected
+      if (uploadedFile) {
+        setIsUploading(true);
+        const uploadResult = await apiClient.uploadFile(uploadedFile);
+        
+        if (!uploadResult.success) {
+          alert(`File upload failed: ${uploadResult.error}`);
+          return;
+        }
+        
+        // Use the uploaded file URL/path in the template
+        templateToSave.file = uploadResult.data?.fileUrl || uploadResult.data?.filename || null;
+        setIsUploading(false);
+      }
+
       const nextTemplates = [...templates];
       if (selectedIndex === null) {
-        nextTemplates.push(draft);
+        nextTemplates.push(templateToSave);
       } else if (selectedIndex >= 0 && selectedIndex < nextTemplates.length) {
-        nextTemplates[selectedIndex] = draft;
+        nextTemplates[selectedIndex] = templateToSave;
       }
 
       const result = await updateProfile({ templates: nextTemplates } as Partial<UserProfile>);
@@ -77,8 +100,12 @@ export default function TemplatesPage() {
         await fetchProfile();
         closeEditor();
       }
+    } catch (error) {
+      console.error('Error saving template:', error);
+      alert('Failed to save template');
     } finally {
       setIsSaving(false);
+      setIsUploading(false);
     }
   };
 
@@ -153,9 +180,11 @@ export default function TemplatesPage() {
               <div className="mb-4 font-medium text-primary line-clamp-1">{t.name || 'Untitled Template'}</div>
               <div className="text-xs text-tertiary line-clamp-4 whitespace-pre-wrap">{t.body}</div>
               {t.file && (
-                <div className="inline-flex items-center gap-1 text-xs mt-3 text-primary">
+                <div className="inline-flex items-center gap-1 text-xs mt-3 text-primary bg-primary/10 px-2 py-1 rounded">
                   <Edit3 className="w-3 h-3" />
-                  Attachment: {t.file}
+                  <span className="truncate max-w-[120px]">
+                    {t.file.split('/').pop() || t.file}
+                  </span>
                 </div>
               )}
             </div>
@@ -236,17 +265,12 @@ export default function TemplatesPage() {
                     />
                   </div>
 
-                  {/* Optional attachment field; file uploads can be added later */}
-                  <div>
-                    <label className="block text-sm text-secondary mb-2">Attachment (optional)</label>
-                    <input
-                      type="text"
-                      value={draft.file || ''}
-                      onChange={(e) => setDraft({ ...(draft as TemplateItem), file: e.target.value })}
-                      placeholder="File path or URL..."
-                      className="w-full px-3 py-2 text-sm text-primary bg-foreground border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
-                  </div>
+                  <FileUpload
+                    onFileSelect={(file) => setUploadedFile(file)}
+                    currentFile={draft.file}
+                    accept="*/*"
+                    maxSize={10}
+                  />
                 </div>
 
                 <div className="flex items-center justify-end gap-3 mt-6">
@@ -258,10 +282,11 @@ export default function TemplatesPage() {
                   </button>
                   <button
                     onClick={handleSave}
-                    disabled={isSaving}
+                    disabled={isSaving || isUploading}
                     className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-primary text-background text-sm font-medium hover:bg-primary/90 disabled:bg-primary/50 cursor-pointer"
                   >
-                    <Save className="w-4 h-4" /> {isSaving ? 'Saving...' : 'Save Template'}
+                    <Save className="w-4 h-4" /> 
+                    {isUploading ? 'Uploading...' : isSaving ? 'Saving...' : 'Save Template'}
                   </button>
                 </div>
               </div>

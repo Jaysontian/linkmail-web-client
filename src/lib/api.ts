@@ -167,6 +167,54 @@ class ApiClient {
       body: JSON.stringify({ notes }),
     });
   }
+
+  // File upload endpoint
+  async uploadFile(file: File): Promise<ApiResponse<{ fileUrl: string; filename: string }>> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const url = `${this.baseURL}/api/upload`;
+    
+    const headers: Record<string, string> = {};
+    if (this.token) {
+      headers.Authorization = `Bearer ${this.token}`;
+    }
+
+    console.log('[ApiClient] Uploading file:', file.name);
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: formData,
+      });
+
+      console.log('[ApiClient] Upload response status:', response.status);
+
+      const data = await response.json();
+      console.log('[ApiClient] Upload response data:', data);
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.error || 'Upload failed',
+          message: data.message || 'Failed to upload file',
+        };
+      }
+
+      return {
+        success: true,
+        data,
+      };
+    } catch (error) {
+      console.error('[ApiClient] File upload failed:', error);
+      return {
+        success: false,
+        error: 'Network error',
+        message: 'Failed to upload file',
+      };
+    }
+  }
 }
 
 // Create singleton instance
