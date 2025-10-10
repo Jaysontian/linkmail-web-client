@@ -9,6 +9,7 @@ import { Plus, X, Save, Trash2, Edit3 } from 'lucide-react';
 
 type TemplateItem = {
   icon?: string;
+  name: string;
   title: string;
   body: string;
   fileUrl?: string | null;
@@ -34,7 +35,8 @@ export default function TemplatesPage() {
     const raw = (profile?.templates as any[]) || [];
     return raw.map((t: any) => ({
       icon: t?.icon || '📝',
-      title: t?.title || 'Untitled',
+      name: t?.name || t?.title || 'Untitled Template',
+      title: t?.title || '',
       body: t?.body || '',
       fileUrl: t?.fileUrl ?? null,
       strict_template: typeof t?.strict_template === 'boolean' ? t.strict_template : false,
@@ -44,7 +46,7 @@ export default function TemplatesPage() {
   const openEditor = (index: number | null) => {
     setSelectedIndex(index);
     if (index === null) {
-      setDraft({ icon: '📝', title: '', body: '', fileUrl: null, strict_template: false });
+      setDraft({ icon: '📝', name: '', title: '', body: '', fileUrl: null, strict_template: false });
     } else {
       setDraft({ ...templates[index] });
     }
@@ -146,7 +148,7 @@ export default function TemplatesPage() {
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
-              <div className="mb-4 font-medium text-primary line-clamp-1">{t.title || 'Untitled'}</div>
+              <div className="mb-4 font-medium text-primary line-clamp-1">{t.name || 'Untitled Template'}</div>
               <div className="text-xs text-tertiary line-clamp-4 whitespace-pre-wrap">{t.body}</div>
               {t.fileUrl && (
                 <a
@@ -192,25 +194,37 @@ export default function TemplatesPage() {
                 </div>
 
                 <div className="grid grid-cols-1 gap-4">
-                  <div>
-                    <label className="block text-sm text-secondary mb-2">Icon</label>
-                    <input
-                      type="text"
-                      maxLength={2}
-                      value={draft.icon || ''}
-                      onChange={(e) => setDraft({ ...(draft as TemplateItem), icon: e.target.value })}
-                      placeholder="e.g. 🔎"
-                      className="w-24 px-3 py-2 text-sm text-primary bg-foreground border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                      <label className="block text-sm text-secondary mb-2">Icon</label>
+                      <input
+                        type="text"
+                        maxLength={2}
+                        value={draft.icon || ''}
+                        onChange={(e) => setDraft({ ...(draft as TemplateItem), icon: e.target.value })}
+                        placeholder="e.g. 🔎"
+                        className="w-full px-3 py-2 text-sm text-primary bg-foreground border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      />
+                    </div>
+                    <div className="md:col-span-3">
+                      <label className="block text-sm text-secondary mb-2">Template Name</label>
+                      <input
+                        type="text"
+                        value={draft.name}
+                        onChange={(e) => setDraft({ ...(draft as TemplateItem), name: e.target.value })}
+                        placeholder="Short Reach Out"
+                        className="w-full px-3 py-2 text-sm text-primary bg-foreground border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      />
+                    </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm text-secondary mb-2">Title</label>
+                    <label className="block text-sm text-secondary mb-2">Subject Line</label>
                     <input
                       type="text"
                       value={draft.title}
                       onChange={(e) => setDraft({ ...(draft as TemplateItem), title: e.target.value })}
-                      placeholder="Short Reach Out"
+                      placeholder="Quick question about [Company]"
                       className="w-full px-3 py-2 text-sm text-primary bg-foreground border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
@@ -238,27 +252,6 @@ export default function TemplatesPage() {
                     />
                   </div>
                 </div>
-
-                <div className="flex items-center justify-between my-8">
-                  <label htmlFor="strict-template-toggle" className="text-sm text-secondary">
-                    <span className="font-medium">Precise Mode</span>
-                    <span className="block my-2 text-tertiary font-light">Strictly use the template as written and don&apos;t modify or try to improve the message.</span>
-                  </label>
-                  <button
-                    id="strict-template-toggle"
-                    type="button"
-                    role="switch"
-                    aria-checked={!!draft.strict_template}
-                    onClick={() => setDraft({ ...(draft as TemplateItem), strict_template: !draft?.strict_template })}
-                    className={`${draft?.strict_template ? 'bg-blue-500' : 'bg-tertiary'} relative inline-flex h-7 w-11 cursor-pointer items-center rounded-full transition-colors focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-foreground`}
-                  >
-                    <span className="sr-only">Toggle strict template</span>
-                    <span
-                      className={`${draft?.strict_template ? 'translate-x-5' : 'translate-x-1'} inline-block h-5 w-5 transform rounded-full bg-white transition-all duration-200 ease-out shadow`}
-                    />
-                  </button>
-                </div>
-                
 
                 <div className="flex items-center justify-end gap-3 mt-6">
                   <button
