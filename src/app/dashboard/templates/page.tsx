@@ -69,7 +69,7 @@ export default function TemplatesPage() {
     setIsSaving(true);
     
     try {
-      let templateToSave = { ...draft };
+      const templateToSave = { ...draft };
 
       // Upload file if there's a new file selected
       if (uploadedFile) {

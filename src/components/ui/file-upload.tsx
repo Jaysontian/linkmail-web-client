@@ -22,13 +22,13 @@ export function FileUpload({
   const [error, setError] = useState<string | null>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
-  const validateFile = (file: File): string | null => {
+  const validateFile = useCallback((file: File): string | null => {
     const maxSizeBytes = maxSize * 1024 * 1024;
     if (file.size > maxSizeBytes) {
       return `File size should be less than ${maxSize}MB`;
     }
     return null;
-  };
+  }, [maxSize]);
 
   const handleFileChange = useCallback((file: File | null) => {
     setError(null);
@@ -45,7 +45,7 @@ export function FileUpload({
     }
     
     onFileSelect(file);
-  }, [onFileSelect, maxSize]);
+  }, [onFileSelect, validateFile]);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
