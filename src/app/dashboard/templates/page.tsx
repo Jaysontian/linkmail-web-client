@@ -11,8 +11,9 @@ type TemplateItem = {
   icon?: string;
   name: string;
   title: string;
+  subject: string;
   body: string;
-  fileUrl?: string | null;
+  file?: string | null;
   strict_template?: boolean;
 };
 
@@ -35,10 +36,11 @@ export default function TemplatesPage() {
     const raw = (profile?.templates as any[]) || [];
     return raw.map((t: any) => ({
       icon: t?.icon || '📝',
-      name: t?.name || t?.title || 'Untitled Template',
-      title: t?.title || '',
+      name: t?.title || 'Untitled Template', // Display name from backend title
+      title: t?.title || '', // Template name (same as display name)
+      subject: t?.subject || '', // Email subject line
       body: t?.body || '',
-      fileUrl: t?.fileUrl ?? null,
+      file: t?.file ?? null, // Attachment file
       strict_template: typeof t?.strict_template === 'boolean' ? t.strict_template : false,
     }));
   }, [profile?.templates]);
@@ -46,7 +48,7 @@ export default function TemplatesPage() {
   const openEditor = (index: number | null) => {
     setSelectedIndex(index);
     if (index === null) {
-      setDraft({ icon: '📝', name: '', title: '', body: '', fileUrl: null, strict_template: false });
+      setDraft({ icon: '📝', name: '', title: '', subject: '', body: '', file: null, strict_template: false });
     } else {
       setDraft({ ...templates[index] });
     }
@@ -150,17 +152,11 @@ export default function TemplatesPage() {
               </div>
               <div className="mb-4 font-medium text-primary line-clamp-1">{t.name || 'Untitled Template'}</div>
               <div className="text-xs text-tertiary line-clamp-4 whitespace-pre-wrap">{t.body}</div>
-              {t.fileUrl && (
-                <a
-                  href={t.fileUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className="inline-flex items-center gap-1 text-xs mt-3 text-primary hover:underline"
-                >
-                  Attachment
+              {t.file && (
+                <div className="inline-flex items-center gap-1 text-xs mt-3 text-primary">
                   <Edit3 className="w-3 h-3" />
-                </a>
+                  Attachment: {t.file}
+                </div>
               )}
             </div>
           ))}
@@ -210,8 +206,8 @@ export default function TemplatesPage() {
                       <label className="block text-sm text-secondary mb-2">Template Name</label>
                       <input
                         type="text"
-                        value={draft.name}
-                        onChange={(e) => setDraft({ ...(draft as TemplateItem), name: e.target.value })}
+                        value={draft.title}
+                        onChange={(e) => setDraft({ ...(draft as TemplateItem), title: e.target.value, name: e.target.value })}
                         placeholder="Short Reach Out"
                         className="w-full px-3 py-2 text-sm text-primary bg-foreground border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                       />
@@ -222,8 +218,8 @@ export default function TemplatesPage() {
                     <label className="block text-sm text-secondary mb-2">Subject Line</label>
                     <input
                       type="text"
-                      value={draft.title}
-                      onChange={(e) => setDraft({ ...(draft as TemplateItem), title: e.target.value })}
+                      value={draft.subject}
+                      onChange={(e) => setDraft({ ...(draft as TemplateItem), subject: e.target.value })}
                       placeholder="Quick question about [Company]"
                       className="w-full px-3 py-2 text-sm text-primary bg-foreground border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                     />
@@ -240,14 +236,14 @@ export default function TemplatesPage() {
                     />
                   </div>
 
-                  {/* Optional attachment URL field; file uploads can be added later */}
+                  {/* Optional attachment field; file uploads can be added later */}
                   <div>
-                    <label className="block text-sm text-secondary mb-2">Attachment URL (optional)</label>
+                    <label className="block text-sm text-secondary mb-2">Attachment (optional)</label>
                     <input
-                      type="url"
-                      value={draft.fileUrl || ''}
-                      onChange={(e) => setDraft({ ...(draft as TemplateItem), fileUrl: e.target.value })}
-                      placeholder="https://..."
+                      type="text"
+                      value={draft.file || ''}
+                      onChange={(e) => setDraft({ ...(draft as TemplateItem), file: e.target.value })}
+                      placeholder="File path or URL..."
                       className="w-full px-3 py-2 text-sm text-primary bg-foreground border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
