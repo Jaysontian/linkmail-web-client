@@ -76,13 +76,19 @@ export default function TemplatesPage() {
         setIsUploading(true);
         const uploadResult = await apiClient.uploadFile(uploadedFile);
         
-        if (!uploadResult.success) {
-          alert(`File upload failed: ${uploadResult.error}`);
+        if (!uploadResult.success || !uploadResult.data) {
+          alert(`File upload failed: ${uploadResult.error || 'Unknown error'}`);
+          setIsUploading(false);
+          setIsSaving(false);
           return;
         }
         
-        // Use the uploaded file URL/path in the template
-        templateToSave.file = uploadResult.data?.fileUrl || uploadResult.data?.filename || null;
+        // Use the uploaded file URL from Vercel Blob Storage
+        templateToSave.file = uploadResult.data.file?.url || null;
+        console.log('[TemplatesPage] File uploaded successfully:', {
+          url: templateToSave.file,
+          originalName: uploadResult.data.file?.originalName
+        });
         setIsUploading(false);
       }
 
