@@ -274,7 +274,13 @@ export default function TemplatesPage() {
                   </div>
 
                   <FileUpload
-                    onFileSelect={(file) => setUploadedFile(file)}
+                    onFileSelect={(file) => {
+                      setUploadedFile(file);
+                      // If file is cleared (null), also clear it from draft
+                      if (file === null && draft) {
+                        setDraft({ ...draft, file: null });
+                      }
+                    }}
                     currentFile={typeof draft.file === 'object' && draft.file?.name ? draft.file.name : (typeof draft.file === 'string' ? draft.file : null)}
                     accept="*/*"
                     maxSize={10}
