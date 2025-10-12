@@ -57,9 +57,9 @@ export default function Home() {
   };
 
   const networkerTexts = [
-    "crazy networkers",
+    "cracked networkers",
     "internship searchers", 
-    "relationship keepers",
+    "LinkedIn warriors",
     "people investors",
   ];
 
@@ -88,6 +88,7 @@ export default function Home() {
                 style={{ objectFit: "contain" }}
               />
               <h1 className="text-xl font-semibold font-tiempos-medium text-primary">Linkmail</h1>
+              <div className="text-xs text-secondary ml-2 py-1 px-2 rounded-lg bg-accent-ultra-light">Beta</div>
             </div>
 
             <div className="flex items-center">
@@ -187,10 +188,10 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="flex flex-row w-full items-stretch justify-center">
+        <div className="flex flex-col w-full items-stretch justify-center">
           {/* Left: Video Demo */}
           <div className="flex-1 flex flex-col justify-center items-center px-12 py-4">
-            <div className="w-full max-w-xl rounded-xl overflow-hidden border border-border">
+            <div className="w-full max-w-3xl rounded-xl overflow-hidden border border-border">
               <video
                 src="/demo_1.webm"
                 autoPlay
@@ -209,34 +210,34 @@ export default function Home() {
           {/* Import Lucide icons at the top of your file if not already imported:
               import { Linkedin, MailCheck, ListChecks } from "lucide-react";
           */}
-          <div className="flex-1 flex flex-col justify-center items-center py-4">
-            <div className="w-full max-w-md space-y-4">
+          <div className="flex-1 flex flex-col justify-center items-center py-4 mt-12">
+            <div className="flex w-full max-w-5xl gap-8">
               {[
                 {
                   title: "Your LinkedIn Companion",
                   content:
                     "Linkmail lives right inside LinkedIn and appears when you're on someone's profile.",
-                  icon: <Linkedin className="w-5 h-5 mr-2 text-primary" />,
+                  icon: <Linkedin strokeWidth={1.5} className="w-8 h-8 mr-2 text-primary" />,
                 },
                 {
                   title: "Automatic Email Finding",
                   content:
                     "Get verified professional emails for your prospects instantly. Useful for students and recruiters.",
-                  icon: <MailCheck className="w-5 h-5 mr-2 text-primary" />,
+                  icon: <MailCheck strokeWidth={1.5} className="w-8 h-8 mr-2 text-primary" />,
                 },
                 {
-                  title: "Automated Outreach Tracking",
+                  title: "Outreach with Agents",
                   content:
                     "Track your outreach, follow-ups, and responses in one place. Stay organized and never miss an opportunity to connect.",
-                  icon: <ListChecks className="w-5 h-5 mr-2 text-primary" />,
+                  icon: <ListChecks strokeWidth={1.5} className="w-8 h-8 mr-2 text-primary" />,
                 },
               ].map((feature, idx) => (
-                <div key={idx} className="my-8 last:mb-0">
+                <div key={idx} className="w-1/3 my-8 last:mb-0">
+                  <div className=" mb-4">{feature.icon}</div>
                   <h3 className="text-2xl font-semibold text-primary font-tiempos-regular mb-2 flex items-center gap-2">
-                    {feature.icon}
                     {feature.title}
                   </h3>
-                  <p className="text-md text-tertiary">{feature.content}</p>
+                  <p className="text-md text-tertiary mt-6">{feature.content}</p>
                 </div>
               ))}
             </div>

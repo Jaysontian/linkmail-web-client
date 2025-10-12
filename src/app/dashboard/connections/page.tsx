@@ -217,17 +217,56 @@ export default function ConnectionsPage() {
             <div
               key={`${connection.user_id}_${connection.contact_id}`}
               onClick={() => handleConnectionClick(connection.contact_id)}
-              className="bg-foreground border border-border rounded-xl p-4 hover:shadow-lg transition-all duration-200 cursor-pointer group"
+              className="bg-foreground border border-border rounded-2xl p-4 hover:shadow-lg transition-all duration-200 cursor-pointer group flex flex-col justify-between"
             >
-               {/* top toolbar */}
-               <div className="flex items-center justify-between">
-                 {/* Checkbox for selecting this connection (for future bulk actions) */}
-                 <input
-                   type="checkbox"
-                   className="form-checkbox h-4 w-4 text-blue-600 border-border rounded focus:ring-blue-500 opacity-0 group-hover:opacity-100 checked:opacity-100 transition-opacity duration-200"
-                   onClick={e => e.stopPropagation()}
-                   aria-label={`Select connection for ${connection.first_name} ${connection.last_name}`}
-                 />
+               
+
+              <div className="flex flex-col items-start">
+                {/* Profile Image */}
+                <div className="w-28 h-28 bg-foreground rounded-xl mb-4 flex items-center justify-start overflow-hidden border border-border">
+                  {connection.profile_picture_url ? (
+                    <img 
+                      src={connection.profile_picture_url} 
+                      alt={`${connection.first_name} ${connection.last_name}`}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        // Fallback to User icon if image fails to load
+                        e.currentTarget.style.display = 'none';
+                        const parent = e.currentTarget.parentElement;
+                        if (parent && !parent.querySelector('.fallback-icon')) {
+                          const icon = document.createElement('div');
+                          icon.className = 'fallback-icon w-full h-full flex items-center justify-center';
+                          icon.innerHTML = '<svg class="h-8 w-8 text-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>';
+                          parent.appendChild(icon);
+                        }
+                      }}
+                    />
+                  ) : (
+                    <User className="h-8 w-8 text-tertiary" />
+                  )}
+                </div>
+
+                {/* Name and Status */}
+                <div className="text-start">
+                  <h3 className="text-lg font-semibold text-primary transition-colors">
+                    {connection.first_name} {connection.last_name}
+                  </h3>
+                </div>
+
+                {/* Company and Role */}
+                <div className="space-y-1 text-start">
+                  <p className="text-[10pt] text-secondary">
+                    {connection.job_title} @ {connection.company}
+                  </p>
+                </div>
+              </div>
+
+
+              {/* top toolbar */}
+              <div className="flex items-center justify-between mt-4">
+                <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${statusColors[connection.status]}`}>
+                  {statusLabels[connection.status]}
+                </span>
 
                <ContextMenu>
                  <ContextMenuTrigger asChild>
@@ -305,58 +344,6 @@ export default function ConnectionsPage() {
                  </ContextMenuContent>
                </ContextMenu>
                 
-              </div>
-
-              {/* Profile Image */}
-              <div className="w-16 h-16 bg-foreground rounded-xl mx-auto mb-4 flex items-center justify-center overflow-hidden">
-                {connection.profile_picture_url ? (
-                  <img 
-                    src={connection.profile_picture_url} 
-                    alt={`${connection.first_name} ${connection.last_name}`}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      // Fallback to User icon if image fails to load
-                      e.currentTarget.style.display = 'none';
-                      const parent = e.currentTarget.parentElement;
-                      if (parent && !parent.querySelector('.fallback-icon')) {
-                        const icon = document.createElement('div');
-                        icon.className = 'fallback-icon w-full h-full flex items-center justify-center';
-                        icon.innerHTML = '<svg class="h-8 w-8 text-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>';
-                        parent.appendChild(icon);
-                      }
-                    }}
-                  />
-                ) : (
-                  <User className="h-8 w-8 text-tertiary" />
-                )}
-              </div>
-
-
-              {/* Name and Status */}
-              <div className="text-center mb-4">
-                <h3 className="text-lg font-semibold text-primary transition-colors">
-                  {connection.first_name} {connection.last_name}
-                </h3>
-              </div>
-
-              {/* Company and Role */}
-              <div className="space-y-1 text-center">
-                {connection.job_title && (
-                  <p className="text-sm text-secondary">
-                    {connection.job_title}
-                  </p>
-                )}
-                {connection.company && (
-                  <div className="flex items-center justify-center gap-1 text-sm text-secondary">
-                    <span>{connection.company}</span>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex items-center justify-center my-4">
-                <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${statusColors[connection.status]}`}>
-                  {statusLabels[connection.status]}
-                </span>
               </div>
 
 

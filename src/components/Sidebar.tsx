@@ -33,7 +33,8 @@ export function Sidebar({ expanded, onToggle }: SidebarProps) {
              <img 
                 src="/logo.png" 
                 alt="LinkMail" 
-                className="h-7 w-auto"
+                className="h-7 w-auto cursor-pointer"
+                onClick={() => window.location.href = '/'}
               />
           </div>
         )}

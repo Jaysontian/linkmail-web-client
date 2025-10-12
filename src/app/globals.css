@@ -93,6 +93,7 @@
   --color-opposite: #000000;
   --color-accent: #0B66C2;
   --color-accent-light: #2B8AEF;
+  --color-accent-ultra-light: #c2dffd;
 }
 
 @layer base {
@@ -109,6 +110,7 @@
     --color-opposite: #ffffff;
     --color-accent: #0B66C2;
     --color-accent-light: #2B8AEF;
+    --color-accent-ultra-light: #c2dffd;
   }
 }
 

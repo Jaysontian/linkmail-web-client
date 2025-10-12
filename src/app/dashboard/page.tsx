@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { LoginButton } from '@/components/LoginButton';
 import { ProfileSetup } from '@/components/ProfileSetup';
 import { Tutorial } from '@/components/Tutorial';
+import { TutorialCarousel } from '@/components/TutorialCarousel';
 import { ChevronRight, Download, BookOpen } from 'lucide-react';
 
 export default function Dashboard() {
@@ -15,6 +16,7 @@ export default function Dashboard() {
   const router = useRouter();
   const [showSuccess, setShowSuccess] = useState(false);
   const [showExtensionCallout, setShowExtensionCallout] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
 
   useEffect(() => {
     // Check if we have a token in the URL (from OAuth callback)
@@ -183,7 +185,7 @@ export default function Dashboard() {
                 </p>
                 <div className="mt-4 flex gap-2">
                   <button
-                    onClick={() => setShowExtensionCallout(true)}
+                    onClick={() => setShowTutorial(true)}
                     className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700 transition-colors cursor-pointer"
                   >
                     <BookOpen className="h-4 w-4" />How It Works
@@ -192,6 +194,12 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
+
+          {/* Tutorial Carousel */}
+          <TutorialCarousel 
+            isOpen={showTutorial} 
+            onClose={() => setShowTutorial(false)} 
+          />
 
 
     </div>
