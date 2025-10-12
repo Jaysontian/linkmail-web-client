@@ -169,7 +169,7 @@ class ApiClient {
   }
 
   // File upload endpoint
-  async uploadFile(file: File): Promise<ApiResponse<{ fileUrl: string; filename: string }>> {
+  async uploadFile(file: File): Promise<ApiResponse<{ success: boolean; file: { url: string; originalName: string; size: number; type: string; pathname: string } }>> {
     const formData = new FormData();
     formData.append('file', file);
 

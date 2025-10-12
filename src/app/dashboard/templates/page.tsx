@@ -15,7 +15,7 @@ type TemplateItem = {
   title: string;
   subject: string;
   body: string;
-  file?: string | null;
+  file?: string | { url: string; name: string; size: number } | null;
   strict_template?: boolean;
 };
 
@@ -44,13 +44,14 @@ export default function TemplatesPage() {
       title: t?.title || '', // Template name (same as display name)
       subject: t?.subject || '', // Email subject line
       body: t?.body || '',
-      file: t?.file ?? null, // Attachment file
+      file: t?.file ?? null, // Attachment file (can be string URL or object with {url, name, size})
       strict_template: typeof t?.strict_template === 'boolean' ? t.strict_template : false,
     }));
   }, [profile?.templates]);
 
   const openEditor = (index: number | null) => {
     setSelectedIndex(index);
+    setUploadedFile(null);
     if (index === null) {
       setDraft({ icon: '📝', name: '', title: '', subject: '', body: '', file: null, strict_template: false });
     } else {
@@ -76,13 +77,20 @@ export default function TemplatesPage() {
         setIsUploading(true);
         const uploadResult = await apiClient.uploadFile(uploadedFile);
         
-        if (!uploadResult.success) {
-          alert(`File upload failed: ${uploadResult.error}`);
+        if (!uploadResult.success || !uploadResult.data) {
+          alert(`File upload failed: ${uploadResult.error || 'Unknown error'}`);
+          setIsUploading(false);
+          setIsSaving(false);
           return;
         }
         
-        // Use the uploaded file URL/path in the template
-        templateToSave.file = uploadResult.data?.fileUrl || uploadResult.data?.filename || null;
+        // Store file as object with URL, name, and size
+        templateToSave.file = {
+          url: uploadResult.data.file?.url || '',
+          name: uploadResult.data.file?.originalName || uploadedFile.name,
+          size: uploadResult.data.file?.size || uploadedFile.size
+        };
+        console.log('[TemplatesPage] File uploaded successfully:', templateToSave.file);
         setIsUploading(false);
       }
 
@@ -183,7 +191,7 @@ export default function TemplatesPage() {
                 <div className="inline-flex items-center gap-1 text-xs mt-3 text-primary bg-primary/10 px-2 py-1 rounded">
                   <Edit3 className="w-3 h-3" />
                   <span className="truncate max-w-[120px]">
-                    {t.file.split('/').pop() || t.file}
+                    {typeof t.file === 'object' && t.file.name ? t.file.name : (typeof t.file === 'string' ? t.file.split('/').pop() : 'Attachment')}
                   </span>
                 </div>
               )}
@@ -266,8 +274,14 @@ export default function TemplatesPage() {
                   </div>
 
                   <FileUpload
-                    onFileSelect={(file) => setUploadedFile(file)}
-                    currentFile={draft.file}
+                    onFileSelect={(file) => {
+                      setUploadedFile(file);
+                      // If file is cleared (null), also clear it from draft
+                      if (file === null && draft) {
+                        setDraft({ ...draft, file: null });
+                      }
+                    }}
+                    currentFile={typeof draft.file === 'object' && draft.file?.name ? draft.file.name : (typeof draft.file === 'string' ? draft.file : null)}
                     accept="*/*"
                     maxSize={10}
                   />
