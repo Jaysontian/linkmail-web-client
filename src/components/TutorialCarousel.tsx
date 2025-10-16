@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { ArrowUpRight, ChevronLeft, ChevronRight, CircleArrowOutUpRight, X } from 'lucide-react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -13,6 +13,7 @@ interface TutorialStep {
   buttonText: string;
   buttonAction: () => void;
   image: string;
+  icon?: string;
 }
 
 interface TutorialCarouselProps {
@@ -22,6 +23,43 @@ interface TutorialCarouselProps {
 
 export function TutorialCarousel({ isOpen, onClose }: TutorialCarouselProps) {
   const [currentStep, setCurrentStep] = useState(0);
+  const [imagesLoaded, setImagesLoaded] = useState<Set<number>>(new Set());
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Reset to first step whenever the carousel opens
+  useEffect(() => {
+    if (isOpen) {
+      setCurrentStep(0);
+      setImagesLoaded(new Set([0])); // Mark first image as loaded
+    }
+  }, [isOpen]);
+
+  // Preload all tutorial images when carousel opens
+  useEffect(() => {
+    if (isOpen) {
+      const preloadImages = async () => {
+        const imagePromises = tutorialSteps.map((step, index) => {
+          if (step.image.endsWith('.webm') || step.image.endsWith('.mp4')) {
+            return Promise.resolve(); // Skip videos for now
+          }
+          
+          return new Promise<void>((resolve) => {
+            const img = new window.Image();
+            img.onload = () => {
+              setImagesLoaded(prev => new Set([...prev, index]));
+              resolve();
+            };
+            img.onerror = () => resolve(); // Continue even if image fails
+            img.src = step.image;
+          });
+        });
+        
+        await Promise.all(imagePromises);
+      };
+      
+      preloadImages();
+    }
+  }, [isOpen]);
 
   const tutorialSteps: TutorialStep[] = [
     {
@@ -42,12 +80,25 @@ export function TutorialCarousel({ isOpen, onClose }: TutorialCarouselProps) {
       needButton: true,
       buttonText: "Download Extension",
       buttonAction: () => {
-        window.open('https://chromewebstore.google.com/detail/linkmail/jkidcmbkofimgdindkagdpdcioighhji', '_blank');
+        window.open('https://chromewebstore.google.com/detail/linkmail/gehgnliedpckenmdindaioghgkhnfjaa', '_blank');
       },
-      image: '/demo_small.webm'
+      icon: '/chrome.png',
+      image: '/tutorial_try.png'
     },
     {
       id: 3,
+      title: "Send Your First Linkmail",
+      description: "Now it's your turn! Send a real outreach email to Jayson in under 10 seconds. Just click below to try the full AI workflow on a real LinkedIn profile.",
+      needButton: true,
+      buttonText: "Send Jayson a Message",
+      buttonAction: () => {
+        window.open('https://www.linkedin.com/in/jaysontian/', '_blank');
+      },
+      icon: '/linkedin.png',
+      image: '/demo_small.webm'
+    },
+    {
+      id: 4,
       title: "Teach Linkmail Your Voice",
       description: "Customize your profile with your professional background and make custom templates. The AI learns how you communicate — so every outreach feels authentic, not robotic.",
       needButton: false,
@@ -58,7 +109,7 @@ export function TutorialCarousel({ isOpen, onClose }: TutorialCarouselProps) {
       image: '/template-demo.webm'
     },
     {
-      id: 4,
+      id: 5,
       title: "Your Relationship OS",
       description: "Every contact, email, and note is saved to your Linkmail dashboard. Track follow-ups, manage conversations, and let your AI remind you when to reconnect or send thoughtful updates.",
       needButton: false,
@@ -67,9 +118,9 @@ export function TutorialCarousel({ isOpen, onClose }: TutorialCarouselProps) {
       image: '/tutorial_network.png'
     },
     {
-      id: 5,
+      id: 6,
       title: "Ready to Master Outreach?",
-      description: "You're all set. Find contacts, craft the perfect message, and build lasting connections — all powered by Linkmail.",
+      description: "You're all set! Time to become a networking superhuman. You can always open this tutorial again from the sidebar menu by clicking your name.",
       needButton: true,
       buttonText: "Let's Begin",
       buttonAction: onClose,
@@ -78,16 +129,29 @@ export function TutorialCarousel({ isOpen, onClose }: TutorialCarouselProps) {
   ];
 
   const nextStep = () => {
-    setCurrentStep((prev) => (prev + 1) % tutorialSteps.length);
+    const nextStepIndex = (currentStep + 1) % tutorialSteps.length;
+    if (nextStepIndex !== currentStep) {
+      setIsLoading(true);
+      setCurrentStep(nextStepIndex);
+      // Reset loading state after a brief delay to allow for smooth transition
+      setTimeout(() => setIsLoading(false), 100);
+    }
   };
 
   const prevStep = () => {
-    setCurrentStep((prev) => (prev - 1 + tutorialSteps.length) % tutorialSteps.length);
+    const prevStepIndex = (currentStep - 1 + tutorialSteps.length) % tutorialSteps.length;
+    if (prevStepIndex !== currentStep) {
+      setIsLoading(true);
+      setCurrentStep(prevStepIndex);
+      setTimeout(() => setIsLoading(false), 100);
+    }
   };
 
   const goToStep = (step: number) => {
     if (step === currentStep) return;
+    setIsLoading(true);
     setCurrentStep(step);
+    setTimeout(() => setIsLoading(false), 100);
   };
 
   const currentTutorial = tutorialSteps[currentStep];
@@ -124,18 +188,23 @@ export function TutorialCarousel({ isOpen, onClose }: TutorialCarouselProps) {
           {/* Content */}
           <div className="flex flex-col lg:flex-row">
             {/* Left side - Image/Video */}
-            <div className="w-full lg:w-1/2 relative h-64 lg:h-auto lg:min-h-96 overflow-hidden">
+            <div className="w-full lg:w-1/2 relative h-64 lg:h-auto lg:min-h-96 overflow-hidden bg-gray-100 dark:bg-gray-800">
+              {/* Loading skeleton */}
+              {isLoading && (
+                <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-pulse" />
+              )}
+              
               <AnimatePresence mode="wait">
                 <motion.div
                   key={currentStep}
-                  initial={{ scale: 1.05, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.95, opacity: 0 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
                   transition={{ 
-                    duration: 0.3, 
-                    ease: [0.16, 1, 0.3, 1]
+                    duration: 0.1, 
+                    ease: "easeInOut"
                   }}
-                  className="w-full h-full"
+                  className="w-full h-full relative"
                 >
                   {currentTutorial.image.endsWith('.webm') || currentTutorial.image.endsWith('.mp4') ? (
                     <video
@@ -145,6 +214,8 @@ export function TutorialCarousel({ isOpen, onClose }: TutorialCarouselProps) {
                       loop
                       muted
                       playsInline
+                      preload="metadata"
+                      poster={currentTutorial.image.replace('.webm', '.png').replace('.mp4', '.png')}
                     />
                   ) : (
                     <Image
@@ -152,7 +223,13 @@ export function TutorialCarousel({ isOpen, onClose }: TutorialCarouselProps) {
                       alt={currentTutorial.title}
                       fill
                       className="object-cover"
-                      priority
+                      priority={currentStep === 0}
+                      quality={85}
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      onLoad={() => {
+                        setImagesLoaded(prev => new Set([...prev, currentStep]));
+                        setIsLoading(false);
+                      }}
                     />
                   )}
                 </motion.div>
@@ -236,14 +313,22 @@ export function TutorialCarousel({ isOpen, onClose }: TutorialCarouselProps) {
                     {currentTutorial.needButton && (
                       <motion.button
                         onClick={currentTutorial.buttonAction}
-                        className="w-fit mt-6 bg-opposite hover:bg-opposite/85 text-white font-medium py-2 px-4 rounded-lg cursor-pointer text-sm"
+                        className="w-fit mt-6 bg-black hover:bg-black/85 text-white font-medium py-2 px-4 rounded-lg cursor-pointer text-sm flex items-center gap-4"
                         initial={{ opacity: 0, y: 5 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2, duration: 0.3 }}
-                        whileHover={{ scale: 1.05 }}
+                        transition={{ delay: 0.2, duration: 0.2 }}
+                        whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.95 }}
                       >
-                        {currentTutorial.buttonText}
+                        {currentTutorial.icon ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={currentTutorial.icon} alt="Logo" className="h-5 w-5" />
+                        ) : (
+                          <ArrowUpRight className="h-4 w-4" />
+                        )}
+
+                        {currentTutorial.buttonText} 
+                        
                       </motion.button>
                     )}
                   </motion.div>
@@ -257,12 +342,11 @@ export function TutorialCarousel({ isOpen, onClose }: TutorialCarouselProps) {
                   disabled={currentStep === 0}
                   className="flex items-center gap-1 px-2 py-1 rounded-md border border-border hover:bg-hover cursor-pointer disabled:opacity-0 disabled:cursor-not-allowed text-xs text-secondary"
                   style={{ minWidth: 0 }}
-                  whileHover={{ scale: currentStep === 0 ? 1 : 1.05 }}
                   whileTap={{ scale: currentStep === 0 ? 1 : 0.95 }}
                   transition={{ type: "spring", stiffness: 400, damping: 25 }}
                 >
                   <ChevronLeft className="h-3 w-3" />
-                  <span className="hidden sm:inline">Previous</span>
+                  <span className="hidden sm:inline text-sm">Previous</span>
                 </motion.button>
 
                 <motion.button
@@ -270,11 +354,10 @@ export function TutorialCarousel({ isOpen, onClose }: TutorialCarouselProps) {
                   disabled={currentStep === tutorialSteps.length - 1}
                   className="flex items-center gap-1 px-2 py-1 rounded-md border border-border hover:bg-hover cursor-pointer disabled:opacity-0 disabled:cursor-not-allowed text-xs text-secondary"
                   style={{ minWidth: 0 }}
-                  whileHover={{ scale: currentStep === tutorialSteps.length - 1 ? 1 : 1.05 }}
                   whileTap={{ scale: currentStep === tutorialSteps.length - 1 ? 1 : 0.95 }}
                   transition={{ type: "spring", stiffness: 400, damping: 25 }}
                 >
-                  <span className="hidden sm:inline">Next</span>
+                  <span className="hidden sm:inline text-sm">Next</span>
                   <ChevronRight className="h-3 w-3" />
                 </motion.button>
               </div>

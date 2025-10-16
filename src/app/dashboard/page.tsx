@@ -6,8 +6,6 @@ import { useUserProfile } from '@/hooks/useUserProfile';
 import { useRouter } from 'next/navigation';
 import { LoginButton } from '@/components/LoginButton';
 import { ProfileSetup } from '@/components/ProfileSetup';
-import { Tutorial } from '@/components/Tutorial';
-import { TutorialCarousel } from '@/components/TutorialCarousel';
 import { ChevronRight, Download, BookOpen } from 'lucide-react';
 
 export default function Dashboard() {
@@ -15,7 +13,6 @@ export default function Dashboard() {
   const { profile, isLoading: profileLoading, getProfileSetupStatus } = useUserProfile();
   const router = useRouter();
   const [showSuccess, setShowSuccess] = useState(false);
-  const [showExtensionCallout, setShowExtensionCallout] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
 
   useEffect(() => {
@@ -40,29 +37,28 @@ export default function Dashboard() {
     }
   }, [isLoading, isAuthenticated, router]);
 
-  // Initialize extension callout visibility from localStorage
+  // Auto-open tutorial on first visit
   useEffect(() => {
-    try {
-      const dismissed = localStorage.getItem('linkmail_ext_callout_dismissed');
-      setShowExtensionCallout(dismissed !== 'true');
-    } catch (err) {
-      setShowExtensionCallout(true);
+    if (!isLoading && isAuthenticated) {
+      try {
+        const hasSeenTutorial = localStorage.getItem('linkmail_tutorial_seen');
+        if (hasSeenTutorial !== 'true') {
+          setShowTutorial(true);
+        }
+      } catch (err) {
+        // If localStorage fails, show tutorial anyway
+        setShowTutorial(true);
+      }
     }
-  }, []);
+  }, [isLoading, isAuthenticated]);
 
-  const handleDismissExtensionCallout = () => {
-    try {
-      localStorage.setItem('linkmail_ext_callout_dismissed', 'true');
-    } catch (err) {
-      // noop
-    }
-    setShowExtensionCallout(false);
-  };
+  // Tutorial modal is now controlled globally in Providers
+
 
   if (isLoading || profileLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-secondary"></div>
       </div>
     );
   }
@@ -89,29 +85,25 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto py-6 px-6 mt-[100px]">
-
-
-          {/* Extension Modal */}
-          <Tutorial 
-            showExtensionCallout={showExtensionCallout} 
-            onDismiss={handleDismissExtensionCallout} 
-          />
+    <div className="max-w-xl mx-auto flex flex-col items-center justify-stretch h-full overflow-x-hidden gap-4">
 
           {/* Welcome Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-tiempos-medium text-primary">
-               Welcome, {user?.name?.split(' ')[0] || 'there'}.
+          <div className="w-full mb-8 my-auto mt-[120px]">
+            <div className="text-sm text-secondary mb-2 mx-auto w-fit bg-foreground px-4 py-1 rounded-lg mb-8">Premium Tier ・ <a href="/dashboard/settings" className="hover:underline">Manage</a></div>
+            <h1 className="text-4xl font-tiempos text-primary text-center flex-1 flex items-center justify-center">
+              Welcome, {user?.name?.split(' ')[0] || 'there'}.
             </h1>
           </div>
 
-          {/* Profile Setup Alert */}
+
+          {/* Top Dismissable Toolbar */}
           {(!profile || !getProfileSetupStatus().isSetupComplete) && (
-            <div className="relative bg-gradient-to-br from-blue-50 via-indigo-100 to-violet-100 border border-blue-100 dark:bg-gradient-to-br dark:from-[#204B9C] dark:via-[#162B69] dark:to-[#162B69] dark:border-slate-800 rounded-xl p-4 mb-6 overflow-hidden group transition-all duration-300">
+            <div className="relative w-full bg-gradient-to-br from-blue-50 via-indigo-100 to-violet-100 border border-blue-100 dark:bg-gradient-to-br dark:from-[#204B9C] dark:via-[#162B69] dark:to-[#162B69] dark:border-slate-800 rounded-3xl p-4 mb-6 overflow-hidden group transition-all duration-300">
               <div className="flex items-center gap-4">
                 <div className="ml-3 flex-1">
-                  <div className="mt-2 text-sm max-w-lg text-primary dark:text-white">
-                    <p>Linkmail crafts the best email when you provide context on your goals and professional background. Please provide us some of your details to get started.</p>
+                  <div className="mt-2 text-sm max-w-xl text-primary dark:text-white">
+                    <h2 className="text-md font-bold">Persoalize Your Profile</h2>
+                    <p className="opacity-50">Linkmail crafts the best email when you provide personal context.</p>
                   </div>
                   <div className="mt-4">
                     <button
@@ -150,56 +142,11 @@ export default function Dashboard() {
           )}
 
 
-          {/* Getting Started Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {/* Install Extension Card */}
-            <div className="bg-foreground overflow-hidden border border-border rounded-2xl">
-              <div className="px-4 py-5 sm:p-6">
-                <div className="flex items-start justify-between mb-2">
-                  <h3 className="text-lg leading-6 font-medium text-primary">Install the Extension</h3>
-                </div>
-                <p className="text-sm text-secondary">
-                  Use Linkmail directly on LinkedIn profiles and inbox to send instantly.
-                </p>
-                <div className="mt-4 flex gap-2">
-                  <a
-                    href="https://chromewebstore.google.com/detail/linkmail/jkidcmbkofimgdindkagdpdcioighhji"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-600 text-white text-sm hover:bg-amber-700 transition-colors cursor-pointer"
-                  >
-                    <Download className="h-4 w-4" /> Install extension
-                  </a>
-                </div>
-              </div>
-            </div>
+          
 
-            {/* Learn / Docs Card */}
-            <div className="bg-foreground overflow-hidden border border-border rounded-2xl">
-              <div className="px-4 py-5 sm:p-6">
-                <div className="flex items-start justify-between mb-2">
-                  <h3 className="text-lg leading-6 font-medium text-primary">Learn about Linkmail</h3>
-                </div>
-                <p className="text-sm text-secondary">
-                  Get started with best practices and examples. Learn how Linkmail works and how to craft great outreach and automate your workflow.
-                </p>
-                <div className="mt-4 flex gap-2">
-                  <button
-                    onClick={() => setShowTutorial(true)}
-                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700 transition-colors cursor-pointer"
-                  >
-                    <BookOpen className="h-4 w-4" />How It Works
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
 
-          {/* Tutorial Carousel */}
-          <TutorialCarousel 
-            isOpen={showTutorial} 
-            onClose={() => setShowTutorial(false)} 
-          />
+        
+
 
 
     </div>

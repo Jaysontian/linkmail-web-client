@@ -255,7 +255,7 @@ export default function Home() {
         {/* Left: Logo and name */}
         <div className="flex items-center gap-4">
           <img src="/logo.png" alt="LinkMail Logo" className="w-6 h-6" />
-          <span className="font-semibold text-base">LinkMail</span>
+          <span className="font-semibold text-base">Linkmail</span>
           <p className="text-center text-xs flex-1 text-white/45">
             &copy; {new Date().getFullYear()} Linkmail AI
           </p>
@@ -263,9 +263,9 @@ export default function Home() {
 
         {/* Right: Links */}
         <div className="flex items-center gap-6">
-          <a href="/about" className="text-xs hover:underline transition-colors">About Us</a>
+          {/* <a href="/about" className="text-xs hover:underline transition-colors">About Us</a> */}
           <a href="/privacy" className="text-xs hover:underline transition-colors">Privacy Policy</a>
-          <a href="/contact" className="text-xs hover:underline transition-colors">Contact Us</a>
+          <a href="mailto:jaysontian@g.ucla.edu" className="text-xs hover:underline transition-colors">Contact Us</a>
         </div>
       </div>
     </footer>

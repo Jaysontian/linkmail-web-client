@@ -153,6 +153,16 @@ export function LoginButton({ expanded = false }: LoginButtonProps) {
             </button>
             <button
               onClick={() => {
+                // Dispatch custom event to open tutorial
+                window.dispatchEvent(new CustomEvent('openTutorial'));
+                setIsDropdownOpen(false);
+              }}
+              className="flex items-center w-full text-left px-2 py-1.5 text-sm rounded-lg text-secondary hover:bg-selection cursor-pointer transition-colors"
+            >
+              Tutorial
+            </button>
+            <button
+              onClick={() => {
                 logout();
                 setIsDropdownOpen(false);
               }}

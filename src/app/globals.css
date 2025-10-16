@@ -88,7 +88,7 @@
   --color-hover: #00000010;
   --color-primary: #202020;
   --color-secondary: #00000094;
-  --color-tertiary: #8e8e8e;
+  --color-tertiary: #00000050;
   --color-border: #00000015;
   --color-opposite: #000000;
   --color-accent: #0B66C2;
@@ -109,8 +109,8 @@
     --color-border: #4e4e4e97;
     --color-opposite: #ffffff;
     --color-accent: #0B66C2;
-    --color-accent-light: #2B8AEF;
-    --color-accent-ultra-light: #c2dffd;
+    --color-accent-light: #246cbb; /* Darker, more muted blue for dark mode */
+    --color-accent-ultra-light: #22384a; /* Muted, dark blue background for accents in dark mode */
   }
 }
 
