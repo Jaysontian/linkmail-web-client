@@ -225,3 +225,42 @@ export function getOAuthUrl(): string {
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
   return `${API_BASE_URL}/api/auth/google?source=web&client_id=${clientId}`;
 }
+
+// Chat endpoints
+export async function generateDraft(
+  token: string,
+  payload: { prompt: string; context?: any }
+): Promise<ApiResponse<{ draft: string; model: string; usage?: any }>> {
+  const client = new ApiClient(API_BASE_URL);
+  client.setToken(token);
+  return client["request"]('/api/chat/generate', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+// Contacts search
+export async function searchContacts(
+  token: string,
+  params: { jobTitle: string; company: string }
+): Promise<ApiResponse<{ results: Array<{ id: number; firstName: string; lastName: string; jobTitle: string | null; company: string | null; category: string | null; linkedinUrl: string | null }> }>> {
+  const client = new ApiClient(API_BASE_URL);
+  client.setToken(token);
+  const query = new URLSearchParams({ jobTitle: params.jobTitle, company: params.company }).toString();
+  return client["request"](`/api/contacts/search?${query}`, {
+    method: 'GET'
+  });
+}
+
+// Save templates via user bio update
+export async function saveTemplate(
+  token: string,
+  templates: any
+): Promise<ApiResponse<any>> {
+  const client = new ApiClient(API_BASE_URL);
+  client.setToken(token);
+  return client["request"]('/api/user/bio', {
+    method: 'PUT',
+    body: JSON.stringify({ templates })
+  });
+}
