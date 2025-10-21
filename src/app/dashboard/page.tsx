@@ -4,35 +4,23 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useRouter } from 'next/navigation';
-import { LoginButton } from '@/components/LoginButton';
-import { ProfileSetup } from '@/components/ProfileSetup';
-import { ChevronRight, Download, BookOpen, PencilRuler, Search, SendHorizonal, ArrowRight, ChevronDown, Bot, Plus, User, Building, Briefcase } from 'lucide-react';
-import { generateDraft, saveTemplate, searchContacts } from '@/lib/api';
+import { ChevronRight, PencilRuler, Search, ArrowRight, ChevronDown, Bot } from 'lucide-react';
+import { saveTemplate } from '@/lib/api';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { TutorialCarousel } from '@/components/TutorialCarousel';
 
 export default function Dashboard() {
   const { user, token, isLoading, isAuthenticated } = useAuth();
-  const { profile, isLoading: profileLoading, getProfileSetupStatus } = useUserProfile();
+  const { profile, isLoading: profileLoading, getProfileSetupStatus, updateProfile } = useUserProfile();
   const router = useRouter();
   const [showSuccess, setShowSuccess] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
   const [mode, setMode] = useState<'draft' | 'find' | 'agent'>('draft');
-  const [recipient, setRecipient] = useState<string | null>(null);
   const [input, setInput] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [draft, setDraft] = useState<string | null>(null);
   const [isGeneratedView, setIsGeneratedView] = useState(false);
   const [messages, setMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([]);
-  const [jobTitleQuery, setJobTitleQuery] = useState('');
-  const [companyQuery, setCompanyQuery] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchResults, setSearchResults] = useState<Array<{ id: number; firstName: string; lastName: string; jobTitle: string | null; company: string | null; category: string | null; linkedinUrl: string | null }>>([]);
-  const people = [
-    { id: '1', name: 'Jane Cooper' },
-    { id: '2', name: 'Devon Lane' },
-    { id: '3', name: 'Courtney Henry' },
-    { id: '4', name: 'Wade Warren' },
-  ];
 
   useEffect(() => {
     // Check if we have a token in the URL (from OAuth callback)
@@ -56,22 +44,36 @@ export default function Dashboard() {
     }
   }, [isLoading, isAuthenticated, router]);
 
-  // Auto-open tutorial on first visit
+  // Auto-open tutorial based on user preferences
   useEffect(() => {
-    if (!isLoading && isAuthenticated) {
-      try {
-        const hasSeenTutorial = localStorage.getItem('linkmail_tutorial_seen');
-        if (hasSeenTutorial !== 'true') {
-          setShowTutorial(true);
-        }
-      } catch (err) {
-        // If localStorage fails, show tutorial anyway
+    if (!isLoading && !profileLoading && isAuthenticated && profile) {
+      // Check if user has seen tutorial in preferences
+      const tutorialSeen = profile.preferences?.tutorialSeen;
+      
+      // Show tutorial if preferences is null or tutorialSeen is not true
+      if (profile.preferences === null || tutorialSeen !== true) {
         setShowTutorial(true);
       }
     }
-  }, [isLoading, isAuthenticated]);
+  }, [isLoading, profileLoading, isAuthenticated, profile]);
 
-  // Tutorial modal is now controlled globally in Providers
+  const handleTutorialClose = async () => {
+    setShowTutorial(false);
+    
+    // Update user preferences using existing updateProfile method
+    if (profile) {
+      try {
+        await updateProfile({
+          preferences: {
+            ...profile.preferences,
+            tutorialSeen: true
+          }
+        });
+      } catch (err) {
+        console.warn('Failed to update tutorial preference:', err);
+      }
+    }
+  };
 
 
   if (isLoading || profileLoading) {
@@ -104,11 +106,11 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="max-w-xl mx-auto flex flex-col overflow-x-hidden">
+    <div className="max-w-xl mx-auto flex flex-col overflow-x-hidden pt-20">
 
           {/* Welcome Header */}
           <div className="w-full mb-4 pt-6 sticky top-0 z-10 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="text-sm text-secondary mb-2 mx-auto w-fit bg-foreground px-4 py-1 rounded-lg mb-8">Premium Tier ・ <a href="/dashboard/settings" className="hover:underline">Manage</a></div>
+            <div className="text-sm text-secondary mb-8 mx-auto w-fit bg-foreground px-4 py-1 rounded-lg">Premium Tier ・ <a href="/dashboard/settings" className="hover:underline">Manage</a></div>
             <h1 className="text-4xl font-tiempos text-primary text-center flex-1 flex items-center justify-center">
               {isGenerating
                 ? 'Cooking...'
@@ -119,7 +121,7 @@ export default function Dashboard() {
           </div>
 
           {/* Content area scrolls with page; header and composer remain sticky */}
-          <div className="w-full px-0 pb-24 pt-2">
+          <div className="w-full px-0 pb-24 pt-2 mt-16">
           {isGeneratedView && (
             <div className="w-full mt-2 flex flex-col gap-3">
               {messages.map((m, idx) => {
@@ -169,9 +171,14 @@ export default function Dashboard() {
             </div>
           )}
 
-
           <div className="w-full sticky bottom-0 z-10 bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/70 pt-2 pb-4">
-            <div className="bg-foreground border border-border w-full rounded-3xl p-4 flex flex-col gap-2 items-center">
+            <div className="bg-foreground border border-border w-full rounded-3xl p-4 flex flex-col gap-2 items-center relative">
+              {/* Beta Tag top right */}
+              <span
+                className="absolute right-4 top-4 px-2 py-1 rounded-lg bg-accent-ultra-light/50 text-xs tracking-wide text-accent select-none"
+              >
+                Beta
+              </span>
               <textarea
                 className="w-full bg-transparent border-none outline-none text-primary placeholder:text-primary/50 resize-none"
                 placeholder="What are your trying to send out today?"
@@ -210,9 +217,7 @@ export default function Dashboard() {
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
-
                 </div>
-                
                 
                 <button
                   className="bg-opposite hover:bg-opposite/80 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer text-background font-semibold rounded-lg transition p-2"
@@ -236,14 +241,9 @@ export default function Dashboard() {
                     <ArrowRight className="w-4 h-4" />
                   )}
                 </button>
-                
-
               </div>
             </div>
           </div>
-
-          
-
 
           {(!profile || !getProfileSetupStatus().isSetupComplete) && !isGeneratedView && (
             <div className="relative w-full bg-gradient-to-br from-blue-50 via-indigo-100 to-violet-100 border border-blue-100 dark:bg-gradient-to-br dark:from-[#204B9C] dark:via-[#162B69] dark:to-[#162B69] dark:border-slate-800 rounded-3xl p-4 mb-6 overflow-hidden group transition-all duration-300">
@@ -289,6 +289,12 @@ export default function Dashboard() {
             </div>
           )}
           </div>
+          
+          {/* Tutorial Carousel */}
+          <TutorialCarousel 
+            isOpen={showTutorial} 
+            onClose={handleTutorialClose}
+          />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { ArrowUpRight, ChevronLeft, ChevronRight, CircleArrowOutUpRight, X } from 'lucide-react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useUserProfile } from '@/hooks/useUserProfile';
 
 interface TutorialStep {
   id: number;
@@ -14,6 +15,7 @@ interface TutorialStep {
   buttonAction: () => void;
   image: string;
   icon?: string;
+  doneButton?: boolean;
 }
 
 interface TutorialCarouselProps {
@@ -25,6 +27,7 @@ export function TutorialCarousel({ isOpen, onClose }: TutorialCarouselProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [imagesLoaded, setImagesLoaded] = useState<Set<number>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
+  const { profile, updateProfile } = useUserProfile();
 
   // Reset to first step whenever the carousel opens
   useEffect(() => {
@@ -61,6 +64,21 @@ export function TutorialCarousel({ isOpen, onClose }: TutorialCarouselProps) {
     }
   }, [isOpen]);
 
+  const handleDownloadClick = async () => {
+    if (profile) {
+      try {
+        await updateProfile({
+          preferences: {
+            ...profile.preferences,
+            hasClickedDownload: true
+          }
+        });
+      } catch (err) {
+        console.warn('Failed to update download preference:', err);
+      }
+    }
+  };
+
   const tutorialSteps: TutorialStep[] = [
     {
       id: 1,
@@ -69,6 +87,7 @@ export function TutorialCarousel({ isOpen, onClose }: TutorialCarouselProps) {
       needButton: false,
       buttonText: "Install Extension",
       buttonAction: () => {
+        handleDownloadClick();
         window.open('https://chromewebstore.google.com/detail/linkmail/jkidcmbkofimgdindkagdpdcioighhji', '_blank');
       },
       image: '/tutorial_1.png'
@@ -80,10 +99,12 @@ export function TutorialCarousel({ isOpen, onClose }: TutorialCarouselProps) {
       needButton: true,
       buttonText: "Download Extension",
       buttonAction: () => {
+        handleDownloadClick();
         window.open('https://chromewebstore.google.com/detail/linkmail/gehgnliedpckenmdindaioghgkhnfjaa', '_blank');
       },
       icon: '/chrome.png',
-      image: '/tutorial_try.png'
+      image: '/tutorial_try.png',
+      doneButton: true
     },
     {
       id: 3,
@@ -95,7 +116,8 @@ export function TutorialCarousel({ isOpen, onClose }: TutorialCarouselProps) {
         window.open('https://www.linkedin.com/in/jaysontian/', '_blank');
       },
       icon: '/linkedin.png',
-      image: '/demo_small.webm'
+      image: '/demo_small.webm',
+      doneButton: true
     },
     {
       id: 4,
@@ -311,25 +333,41 @@ export function TutorialCarousel({ isOpen, onClose }: TutorialCarouselProps) {
                       {currentTutorial.description}
                     </motion.p>
                     {currentTutorial.needButton && (
-                      <motion.button
-                        onClick={currentTutorial.buttonAction}
-                        className="w-fit mt-6 bg-black hover:bg-black/85 text-white font-medium py-2 px-4 rounded-lg cursor-pointer text-sm flex items-center gap-4"
-                        initial={{ opacity: 0, y: 5 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2, duration: 0.2 }}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        {currentTutorial.icon ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={currentTutorial.icon} alt="Logo" className="h-5 w-5" />
-                        ) : (
-                          <ArrowUpRight className="h-4 w-4" />
-                        )}
+                      <div className="flex items-center gap-3 mt-6">
+                        <motion.button
+                          onClick={currentTutorial.buttonAction}
+                          className="bg-opposite hover:bg-opposite/85 text-background font-medium py-2 px-4 rounded-lg cursor-pointer text-sm flex items-center gap-4"
+                          initial={{ opacity: 0, y: 5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.2, duration: 0.2 }}
+                          whileHover={{ scale: 1 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          {currentTutorial.icon ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={currentTutorial.icon} alt="Logo" className="h-5 w-5" />
+                          ) : (
+                            <ArrowUpRight className="h-4 w-4" />
+                          )}
 
-                        {currentTutorial.buttonText} 
+                          {currentTutorial.buttonText} 
+                          
+                        </motion.button>
                         
-                      </motion.button>
+                        {currentTutorial.doneButton && (
+                          <motion.button
+                            onClick={nextStep}
+                            className="bg-secondary/10 hover:bg-secondary/20 text-secondary font-medium py-2 px-4 rounded-lg cursor-pointer text-sm border border-border/50"
+                            initial={{ opacity: 0, y: 5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 2, duration: 0.2 }}
+                            whileHover={{ scale: 1 }}
+                            whileTap={{ scale: 0.98 }}
+                          >
+                            Continue
+                          </motion.button>
+                        )}
+                      </div>
                     )}
                   </motion.div>
                 </AnimatePresence>
@@ -349,17 +387,19 @@ export function TutorialCarousel({ isOpen, onClose }: TutorialCarouselProps) {
                   <span className="hidden sm:inline text-sm">Previous</span>
                 </motion.button>
 
-                <motion.button
-                  onClick={nextStep}
-                  disabled={currentStep === tutorialSteps.length - 1}
-                  className="flex items-center gap-1 px-2 py-1 rounded-md border border-border hover:bg-hover cursor-pointer disabled:opacity-0 disabled:cursor-not-allowed text-xs text-secondary"
-                  style={{ minWidth: 0 }}
-                  whileTap={{ scale: currentStep === tutorialSteps.length - 1 ? 1 : 0.95 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                >
-                  <span className="hidden sm:inline text-sm">Next</span>
-                  <ChevronRight className="h-3 w-3" />
-                </motion.button>
+                {!currentTutorial.doneButton && (
+                  <motion.button
+                    onClick={nextStep}
+                    disabled={currentStep === tutorialSteps.length - 1}
+                    className="flex items-center gap-1 px-2 py-1 rounded-md border border-border hover:bg-hover cursor-pointer disabled:opacity-0 disabled:cursor-not-allowed text-xs text-secondary"
+                    style={{ minWidth: 0 }}
+                    whileTap={{ scale: currentStep === tutorialSteps.length - 1 ? 1 : 0.95 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                  >
+                    <span className="hidden sm:inline text-sm">Next</span>
+                    <ChevronRight className="h-3 w-3" />
+                  </motion.button>
+                )}
               </div>
             </div>
           </div>

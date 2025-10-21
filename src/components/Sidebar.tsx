@@ -1,8 +1,10 @@
 'use client';
 
 import { useRouter, usePathname } from 'next/navigation';
-import { Menu, X, Home, User, Mail, Users, FileText, PanelLeftClose, PanelLeftOpen, PanelLeft, LayoutDashboard, SquareUserRound, MessageSquare, CircleDotDashed } from 'lucide-react';
+import { Menu, X, Home, User, Mail, Users, FileText, PanelLeftClose, PanelLeftOpen, PanelLeft, LayoutDashboard, SquareUserRound, MessageSquare, CircleDotDashed, Download, X as XIcon } from 'lucide-react';
 import { LoginButton } from './LoginButton';
+import { useUserProfile } from '@/hooks/useUserProfile';
+import { useState, useEffect } from 'react';
 
 interface SidebarProps {
   expanded: boolean;
@@ -12,6 +14,8 @@ interface SidebarProps {
 export function Sidebar({ expanded, onToggle }: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const { profile, updateProfile } = useUserProfile();
+  const [showExtensionCallout, setShowExtensionCallout] = useState(false);
 
   const navigation = [
     { name: 'Overview', href: '/dashboard', icon: Home },
@@ -22,6 +26,54 @@ export function Sidebar({ expanded, onToggle }: SidebarProps) {
 
   const handleNavigation = (href: string) => {
     router.push(href);
+  };
+
+  // Check if extension callout should be shown
+  useEffect(() => {
+    if (profile) {
+      const extensionCalloutDismissed = profile.preferences?.extensionCalloutDismissed;
+      const hasClickedDownload = profile.preferences?.hasClickedDownload;
+      
+      // Show callout if not dismissed and user hasn't clicked download
+      if (!extensionCalloutDismissed && !hasClickedDownload) {
+        setShowExtensionCallout(true);
+      }
+    }
+  }, [profile]);
+
+  const handleDismissCallout = async () => {
+    setShowExtensionCallout(false);
+    
+    if (profile) {
+      try {
+        await updateProfile({
+          preferences: {
+            ...profile.preferences,
+            extensionCalloutDismissed: true
+          }
+        });
+      } catch (err) {
+        console.warn('Failed to update extension callout preference:', err);
+      }
+    }
+  };
+
+  const handleDownloadClick = async () => {
+    if (profile) {
+      try {
+        await updateProfile({
+          preferences: {
+            ...profile.preferences,
+            hasClickedDownload: true,
+            extensionCalloutDismissed: true
+          }
+        });
+      } catch (err) {
+        console.warn('Failed to update download preference:', err);
+      }
+    }
+    // Open extension link
+    window.open('https://chromewebstore.google.com/detail/linkmail/gehgnliedpckenmdindaioghgkhnfjaa', '_blank');
   };
 
   return (
@@ -73,6 +125,46 @@ export function Sidebar({ expanded, onToggle }: SidebarProps) {
           );
         })}
       </nav>
+
+      {/* Extension Callout */}
+      {showExtensionCallout && expanded && (
+        <div className="p-2">
+          <div className="bg-background border border-border rounded-xl p-3 mb-2">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <img
+                    src="/chrome.png"
+                    alt="Chrome"
+                    className="h-4 w-4"
+                    style={{ display: 'inline-block' }}
+                  />
+                  <span className="text-sm font-medium text-primary">
+                    Download Extension
+                  </span>
+                </div>
+                <p className="text-xs text-secondary my-2 mb-8">
+                  Download the extension to use Linkmail in LinkedIn.
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleDownloadClick}
+                    className="bg-opposite text-background text-xs px-2 py-1 rounded-md cursor-pointer transition-colors"
+                  >
+                    Download
+                  </button>
+                  <button
+                    onClick={handleDismissCallout}
+                    className="text-secondary text-xs px-2 py-1 rounded-md hover:bg-hover cursor-pointer transition-colors"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Sidebar Footer */}
       <div className="p-2">

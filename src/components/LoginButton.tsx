@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { getOAuthUrl } from '@/lib/api';
 import { Settings } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface LoginButtonProps {
   expanded?: boolean;
@@ -128,16 +129,23 @@ export function LoginButton({ expanded = false }: LoginButtonProps) {
           )}
         </button>
 
-        {isDropdownOpen && (
-          <div className={`absolute w-60 bg-white/10 backdrop-blur-md rounded-md shadow-lg p-1 z-50 border border-border ${
-            dropdownPosition.vertical === 'top' 
-              ? 'bottom-full mb-2' 
-              : 'top-full mt-2'
-          } ${
-            dropdownPosition.horizontal === 'right'
-              ? (expanded ? 'right-0' : 'left-0')
-              : 'left-0'
-          }`}>
+        <AnimatePresence>
+          {isDropdownOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: dropdownPosition.vertical === 'top' ? 10 : -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: dropdownPosition.vertical === 'top' ? 10 : -10 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
+              className={`absolute w-60 bg-foreground rounded-xl shadow-lg p-1 z-50 border border-border ${
+                dropdownPosition.vertical === 'top' 
+                  ? 'bottom-full mb-2' 
+                  : 'top-full mt-2'
+              } ${
+                dropdownPosition.horizontal === 'right'
+                  ? (expanded ? 'right-0' : 'left-0')
+                  : 'left-0'
+              }`}
+            >
             <div className="px-2 py-1.5 border-b border-border mb-2">
               <p className="text-sm font-medium text-primary">{user.name}</p>
               <p className="text-sm text-secondary truncate">{user.email}</p>
@@ -170,8 +178,9 @@ export function LoginButton({ expanded = false }: LoginButtonProps) {
             >
               Logout
             </button>
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     );
   }
