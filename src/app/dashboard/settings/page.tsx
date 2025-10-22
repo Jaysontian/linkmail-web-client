@@ -319,7 +319,7 @@ export default function SettingsPage() {
                             {emailFinderUsage.hasReachedLimit ? (
                               <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
                                 <p className="text-sm text-red-600 dark:text-red-400">
-                                  You've reached your email finder limit. Upgrade to get more lookups.
+                                  You&apos;ve reached your email finder limit. Upgrade to get more lookups.
                                 </p>
                               </div>
                             ) : (
