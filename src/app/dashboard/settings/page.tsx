@@ -4,21 +4,55 @@ import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, CreditCard } from 'lucide-react';
+import { User, CreditCard, Zap } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
 import Image from 'next/image';
+import { apiClient } from '@/lib/api';
 
 export default function SettingsPage() {
   const { user, isLoading, isAuthenticated } = useAuth();
   const { theme, setTheme } = useTheme();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('general');
+  const [emailFinderUsage, setEmailFinderUsage] = useState<{
+    current: number;
+    limit: number;
+    remaining: number;
+    hasReachedLimit: boolean;
+  } | null>(null);
+  const [loadingEmailFinder, setLoadingEmailFinder] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       router.push('/');
     }
   }, [isLoading, isAuthenticated, router]);
+
+  // Fetch email finder usage when subscription tab is active
+  useEffect(() => {
+    const fetchEmailFinderUsage = async () => {
+      if (activeTab === 'subscription' && isAuthenticated) {
+        setLoadingEmailFinder(true);
+        try {
+          const response = await apiClient.getEmailFinderUsage();
+          if (response.success && response.data) {
+            setEmailFinderUsage({
+              current: response.data.current || 0,
+              limit: response.data.limit || 50,
+              remaining: response.data.remaining || 0,
+              hasReachedLimit: response.data.hasReachedLimit || false
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching email finder usage:', error);
+        } finally {
+          setLoadingEmailFinder(false);
+        }
+      }
+    };
+
+    fetchEmailFinderUsage();
+  }, [activeTab, isAuthenticated]);
 
   if (isLoading) {
     return (
@@ -219,6 +253,91 @@ export default function SettingsPage() {
                         </p>
                       </div>
 
+                      {/* Email Finder Usage Card */}
+                      <div className="bg-foreground border border-border rounded-xl p-6 shadow-sm">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2.5 bg-accent/10 rounded-lg">
+                              <Zap className="w-5 h-5 text-accent" />
+                            </div>
+                            <div>
+                              <h3 className="text-lg font-medium text-primary">
+                                Email Finder
+                              </h3>
+                              <p className="text-sm text-tertiary mt-0.5">
+                                Find verified email addresses
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {loadingEmailFinder ? (
+                          <div className="flex items-center justify-center py-8">
+                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-accent"></div>
+                          </div>
+                        ) : emailFinderUsage ? (
+                          <div className="space-y-4">
+                            {/* Usage Stats */}
+                            <div className="flex items-end justify-between">
+                              <div>
+                                <p className="text-sm text-secondary mb-1">Current Usage</p>
+                                <div className="flex items-baseline gap-2">
+                                  <span className="text-3xl font-newsreader-500 text-primary">
+                                    {emailFinderUsage.current}
+                                  </span>
+                                  <span className="text-lg text-tertiary">
+                                    / {emailFinderUsage.limit}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-sm text-secondary mb-1">Remaining</p>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-2xl font-newsreader-500 text-primary">
+                                    {emailFinderUsage.remaining}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Progress Bar */}
+                            <div className="space-y-2">
+                              <div className="w-full h-2.5 bg-background rounded-full overflow-hidden">
+                                <div
+                                  className="h-full rounded-full transition-all duration-500 bg-accent"
+                                  style={{ width: `${Math.min((emailFinderUsage.current / emailFinderUsage.limit) * 100, 100)}%` }}
+                                />
+                              </div>
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="text-tertiary">
+                                  {((emailFinderUsage.current / emailFinderUsage.limit) * 100).toFixed(0)}% used
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Info Message */}
+                            {emailFinderUsage.hasReachedLimit ? (
+                              <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+                                <p className="text-sm text-red-600 dark:text-red-400">
+                                  You've reached your email finder limit. Upgrade to get more lookups.
+                                </p>
+                              </div>
+                            ) : (
+                              <div className="mt-4 p-3 bg-accent/5 border border-accent/10 rounded-lg">
+                                <p className="text-sm text-secondary">
+                                  Email finder credits are used when finding email addresses for LinkedIn profiles. Each successful email lookup counts as one credit.
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="text-center py-4">
+                            <p className="text-sm text-tertiary">Unable to load usage data</p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Subscription Management Placeholder */}
                       <div className="text-center py-12">
                         <div className="mx-auto w-24 h-24 bg-foreground rounded-full flex items-center justify-center mb-4">
                           <CreditCard className="w-12 h-12 text-secondary" />

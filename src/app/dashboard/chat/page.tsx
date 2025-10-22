@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useRouter } from 'next/navigation';
-import { ChevronDown, Bot, PencilRuler, Search, ArrowRight } from 'lucide-react';
+import { ChevronDown, Bot, PencilRuler, Search, ArrowRight, X } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { generateDraft, saveTemplate } from '@/lib/api';
 import { useSidebar } from '@/contexts/SidebarContext';
@@ -13,7 +14,7 @@ type ChatMessage = { role: 'user' | 'assistant'; content: string };
 
 export default function ChatPage() {
   const { user, token, isLoading, isAuthenticated } = useAuth();
-  const { profile } = useUserProfile();
+  const { profile, updateProfile, fetchProfile } = useUserProfile();
   const router = useRouter();
   const { leftOffsetPx } = useSidebar();
 
@@ -21,8 +22,11 @@ export default function ChatPage() {
   const [input, setInput] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [draft, setDraft] = useState<string | null>(null);
+  const [subject, setSubject] = useState<string>('');
   const [mode, setMode] = useState<'draft' | 'find' | 'agent'>('draft');
   const [thinkingMessage, setThinkingMessage] = useState<string>('');
+  const [showNameDialog, setShowNameDialog] = useState(false);
+  const [templateName, setTemplateName] = useState('');
 
   const thinkingMessages = [
     "cooking for you...",
@@ -68,6 +72,7 @@ export default function ChatPage() {
               const assistantMsg = { role: 'assistant' as const, content: res.data.draft };
               setMessages([...nextMessages, assistantMsg]);
               setDraft(res.data.draft);
+              setSubject(res.data.subject || '');
             }
             stopThinking();
             setIsGenerating(false);
@@ -95,6 +100,39 @@ export default function ChatPage() {
     }
   }, [draft]);
 
+  const handleSaveTemplate = async () => {
+    if (!draft?.trim() || !templateName.trim() || !updateProfile) return;
+    
+    try {
+      const currentTemplates = (profile?.templates as any[]) || [];
+      const newTemplate = {
+        icon: '📝',
+        title: templateName.trim(),
+        subject: subject.trim() || '',
+        body: draft.trim(),
+        file: null,
+        strict_template: false
+      };
+      
+      const updatedTemplates = [...currentTemplates, newTemplate];
+      const result = await updateProfile({ templates: updatedTemplates });
+      
+      if (result.success) {
+        await fetchProfile();
+        // Navigate back to templates page
+        router.push('/dashboard/templates');
+      } else {
+        alert('Failed to save template');
+      }
+    } catch (error) {
+      console.error('Error saving template:', error);
+      alert('Failed to save template');
+    } finally {
+      setShowNameDialog(false);
+      setTemplateName('');
+    }
+  };
+
   return (
     <div className="max-w-xl mx-auto flex flex-col overflow-x-hidden relative pt-20">
       {/* Top fade - fixed at top of page */}
@@ -110,31 +148,39 @@ export default function ChatPage() {
                 <div className={`${isAssistant ? 'w-full bg-foreground py-4' : 'bg-accent text-primary w-fit py-2'} rounded-3xl px-4 max-w-full text-sm`}>
                   {isAssistant ? (
                     isLatestAssistant ? (
-                      <div className="flex flex-col gap-2">
-                        <textarea
-                          className="w-full bg-transparent border-none outline-none text-primary placeholder:text-primary/50 resize-none overflow-hidden"
-                          value={draft ?? m.content}
-                          onChange={(e) => {
-                            setDraft(e.target.value);
-                            // Auto-resize textarea
-                            e.target.style.height = 'auto';
-                            e.target.style.height = e.target.scrollHeight + 'px';
-                          }}
-                          placeholder="Your drafted email..."
-                          style={{ minHeight: '120px' }}
-                        />
+                      <div className="flex flex-col gap-3">
+                        <div className="flex flex-col gap-2">
+                          <label className="text-xs text-secondary font-medium">Subject Line</label>
+                          <input
+                            type="text"
+                            className="w-full bg-background border border-border rounded-lg px-3 py-2 text-primary placeholder:text-primary/50 focus:outline-none focus:ring-2 focus:ring-primary"
+                            value={subject}
+                            onChange={(e) => setSubject(e.target.value)}
+                            placeholder="Subject line..."
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <label className="text-xs text-secondary font-medium">Email Body</label>
+                          <textarea
+                            className="w-full bg-background border border-border rounded-lg px-3 py-2 text-primary placeholder:text-primary/50 resize-none overflow-hidden focus:outline-none focus:ring-2 focus:ring-primary"
+                            value={draft ?? m.content}
+                            onChange={(e) => {
+                              setDraft(e.target.value);
+                              // Auto-resize textarea
+                              e.target.style.height = 'auto';
+                              e.target.style.height = e.target.scrollHeight + 'px';
+                            }}
+                            placeholder="Your drafted email..."
+                            style={{ minHeight: '120px' }}
+                          />
+                        </div>
                         <div className="flex items-center justify-end">
                           <button
-                            className="text-sm px-3 py-1.5 rounded-xl border border-border text-secondary hover:bg-secondary/10 cursor-pointer"
+                            className="text-sm px-3 py-1.5 rounded-xl border border-border text-secondary hover:bg-secondary/10 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                             disabled={!draft?.trim() || !token}
-                            onClick={async () => {
-                              if (!token || !draft) return;
-                              const currentTemplates = (profile?.templates as any) || [];
-                              const newTemplates = [
-                                ...currentTemplates,
-                                { content: draft, createdAt: new Date().toISOString() }
-                              ];
-                              await saveTemplate(token, newTemplates);
+                            onClick={() => {
+                              if (!draft?.trim()) return;
+                              setShowNameDialog(true);
                             }}
                           >
                             Add as template
@@ -196,6 +242,7 @@ export default function ChatPage() {
                     const assistantMsg: ChatMessage = { role: 'assistant', content: res.data.draft };
                     setMessages([...nextMessages, assistantMsg]);
                     setDraft(res.data.draft);
+                    setSubject(res.data.subject || '');
                   }
                   stopThinking();
                   setIsGenerating(false);
@@ -254,6 +301,7 @@ export default function ChatPage() {
                   const assistantMsg: ChatMessage = { role: 'assistant', content: res.data.draft };
                   setMessages([...nextMessages, assistantMsg]);
                   setDraft(res.data.draft);
+                  setSubject(res.data.subject || '');
                 }
                 stopThinking();
                 setIsGenerating(false);
@@ -270,6 +318,75 @@ export default function ChatPage() {
           </div>
         </div>
       </div>
+
+      {/* Template Name Dialog */}
+      <AnimatePresence>
+        {showNameDialog && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div className="absolute inset-0 bg-black/60" onClick={() => setShowNameDialog(false)} />
+            <motion.div
+              className="relative bg-background w-full max-w-md mx-4 rounded-2xl shadow-xl border border-border"
+              initial={{ scale: 0.95, y: 10, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.98, y: 6, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 26 }}
+            >
+              <div className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <h3 className="text-2xl font-tiempos-medium text-primary">Name Your Template</h3>
+                    <p className="text-sm text-tertiary mt-2">Give this template a memorable name</p>
+                  </div>
+                  <button onClick={() => setShowNameDialog(false)} className="p-2 rounded-lg hover:bg-hover cursor-pointer">
+                    <X className="w-4 h-4 text-tertiary" />
+                  </button>
+                </div>
+
+                <div className="mb-6">
+                  <label className="block text-sm text-secondary mb-2">Template Name</label>
+                  <input
+                    type="text"
+                    value={templateName}
+                    onChange={(e) => setTemplateName(e.target.value)}
+                    placeholder="e.g. Coffee Chat Request"
+                    className="w-full px-3 py-2 text-sm text-primary bg-foreground border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && templateName.trim()) {
+                        handleSaveTemplate();
+                      }
+                    }}
+                    autoFocus
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-3">
+                  <button
+                    onClick={() => {
+                      setShowNameDialog(false);
+                      setTemplateName('');
+                    }}
+                    className="px-4 py-2 rounded-xl border border-border text-secondary text-sm hover:bg-hover cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSaveTemplate}
+                    disabled={!templateName.trim()}
+                    className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-primary text-background text-sm font-medium hover:bg-primary/90 disabled:bg-primary/50 disabled:cursor-not-allowed cursor-pointer"
+                  >
+                    Continue
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

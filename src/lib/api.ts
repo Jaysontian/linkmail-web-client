@@ -121,6 +121,10 @@ class ApiClient {
     });
   }
 
+  async getEmailFinderUsage() {
+    return this.request('/api/user/apollo-usage');
+  }
+
   // Email endpoints
   async getEmailHistory() {
     return this.request('/api/email/history');
@@ -230,7 +234,7 @@ export function getOAuthUrl(): string {
 export async function generateDraft(
   token: string,
   payload: { prompt: string; context?: any }
-): Promise<ApiResponse<{ draft: string; model: string; usage?: any }>> {
+): Promise<ApiResponse<{ draft: string; subject: string; body: string; model: string; usage?: any }>> {
   const client = new ApiClient(API_BASE_URL);
   client.setToken(token);
   return client["request"]('/api/chat/generate', {

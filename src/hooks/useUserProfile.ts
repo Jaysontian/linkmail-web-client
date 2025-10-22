@@ -16,7 +16,7 @@ export interface UserProfile {
   updated_at: string;
   templates: any[] | null;
   user_email: string | null;
-  apollo_api_calls: number;
+  email_finder_calls: number;
   school: string | null;
   preferences: any | null;
 }
