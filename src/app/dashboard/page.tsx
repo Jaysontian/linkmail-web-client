@@ -4,10 +4,8 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useRouter } from 'next/navigation';
-import { ChevronRight, PencilRuler, Search, ArrowRight, ChevronDown, Bot, ArrowUpRight, Flame } from 'lucide-react';
-import { saveTemplate } from '@/lib/api';
+import { ChevronRight, Flame } from 'lucide-react';
 import { useConnections } from '@/hooks/useConnections';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { TutorialCarousel } from '@/components/TutorialCarousel';
 
 export default function Dashboard() {
@@ -17,12 +15,6 @@ export default function Dashboard() {
   const { count: reachoutCount, isLoading: connectionsLoading } = useConnections();
   const [showSuccess, setShowSuccess] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
-  const [mode, setMode] = useState<'draft' | 'find' | 'agent'>('draft');
-  const [input, setInput] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [draft, setDraft] = useState<string | null>(null);
-  const [isGeneratedView, setIsGeneratedView] = useState(false);
-  const [messages, setMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([]);
 
   useEffect(() => {
     // Check if we have a token in the URL (from OAuth callback)
@@ -114,160 +106,76 @@ export default function Dashboard() {
         <div className="w-full mb-4 pt-6 sticky top-0 z-10 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="text-sm text-secondary mb-8 mx-auto w-fit bg-foreground px-4 py-1 rounded-lg">Premium Tier ・ <a href="/dashboard/settings" className="hover:underline">Manage</a></div>
           <h1 className="text-4xl font-tiempos text-primary text-center flex-1 flex items-center justify-center">
-            {isGenerating
-              ? 'Cooking...'
-              : (isGeneratedView
-                  ? `Here you go, ${user?.name?.split(' ')[0] || 'there'}`
-                  : `Welcome, ${user?.name?.split(' ')[0] || 'there'}.`)}
+            Welcome, {user?.name?.split(' ')[0] || 'there'}.
           </h1>
         </div>
 
         {/* Content area scrolls with page; header and composer remain sticky */}
-        <div className="w-full px-0 pb-24 pt-2 mt-16">
+        <div className="w-full px-0 pb-24 pt-2 mt-4">
           
-          
-          {isGeneratedView && (
-            <div className="w-full mt-2 flex flex-col gap-3">
-              {messages.map((m, idx) => {
-                const isAssistant = m.role === 'assistant';
-                const isLatestAssistant = isAssistant && messages.slice().reverse().find((mm) => mm.role === 'assistant') === m;
-                return (
-                  <div key={idx} className={`${isAssistant ? '' : 'flex justify-end'}`}>
-                    <div className={`${isAssistant ? 'bg-foreground border border-border' : 'bg-opposite text-background'} rounded-3xl p-4 max-w-full w-full`}>
-                      {isAssistant ? (
-                        isLatestAssistant ? (
-                          <div className="flex flex-col gap-2">
-                            <textarea
-                              className="w-full bg-transparent border-none outline-none text-primary placeholder:text-primary/50 resize-y min-h-[180px]"
-                              value={draft || m.content}
-                              onChange={(e) => setDraft(e.target.value)}
-                              placeholder="Your drafted email..."
-                              rows={8}
-                            />
-                            <div className="flex items-center justify-end">
-                              <button
-                                className="text-sm px-3 py-1.5 rounded-xl border border-border text-secondary hover:bg-secondary/10 cursor-pointer"
-                                disabled={!draft?.trim() || !token}
-                                onClick={async () => {
-                                  if (!token || !draft) return;
-                                  const currentTemplates = (profile?.templates as any) || [];
-                                  const newTemplates = [
-                                    ...currentTemplates,
-                                    { content: draft, createdAt: new Date().toISOString() }
-                                  ];
-                                  await saveTemplate(token, newTemplates);
-                                }}
-                              >
-                                Add as template
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="whitespace-pre-wrap text-primary">{m.content}</div>
-                        )
-                      ) : (
-                        <div className="whitespace-pre-wrap">{m.content}</div>
-                      )}
+          {/* Weekly Streak - moved from below */}
+          {!connectionsLoading && (
+            <div className="w-full sticky bottom-0 z-10 bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/70 pt-2 pb-4">
+              <div className="relative w-full bg-foreground rounded-3xl p-5 overflow-hidden transition-all duration-300">
+                <div className="flex items-center gap-6">
+                  <div className="flex-1">
+                    <div className="text-sm text-primary py-4">
+                      <h2 className="text-base font-semibold pb-1">Weekly Streak</h2>
+                      <p className="opacity-60 mb-4">Keep sending outreach and keep the momentum going!</p>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          window.open(
+                            'https://www.linkedin.com/feed/',
+                            '_blank',
+                            'noopener,noreferrer'
+                          )
+                        }
+                        className="flex items-center bg-white/70 hover:bg-white/55 dark:bg-white/10 dark:hover:bg-white/20 cursor-pointer text-black/70 dark:text-slate-100 px-4 py-2 rounded-xl text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      >
+                        <img
+                          src="/linkedin.png"
+                          alt="LinkedIn"
+                          className="w-4 h-4 mr-3"
+                        />
+                        <span className="inline-flex items-center gap-2">Open LinkedIn</span>
+                      </button>
                     </div>
                   </div>
-                );
-              })}
+                  <div className="flex flex-col justify-center items-end px-3 py-2">
+                    <div className="flex flex-row items-center">
+                      <Flame
+                        className="w-8 h-8 mr-1 text-transparent"
+                        style={{
+                          stroke: "none",
+                          fill: "url(#flame-gradient)",
+                        }}
+                      />
+                      <svg width="0" height="0">
+                        <defs>
+                          <linearGradient
+                            id="flame-gradient"
+                            x1="0%"
+                            y1="0%"
+                            x2="0%"
+                            y2="100%"
+                          >
+                            <stop offset="0%" stopColor="#3b82f6" />
+                            <stop offset="100%" stopColor="#6366f1" />
+                          </linearGradient>
+                        </defs>
+                      </svg>
+                      <div className="text-4xl font-semibold text-primary leading-none">
+                        {reachoutCount}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
-          <div className="w-full sticky bottom-0 z-10 bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/70 pt-2 pb-4">
-            <div className="bg-foreground border border-border w-full rounded-3xl p-4 flex flex-col gap-2 items-center relative">
-              {/* Beta Tag top right */}
-              <span
-                className="absolute right-4 top-4 px-2 py-1 rounded-lg bg-accent-ultra-light/50 text-xs tracking-wide text-accent select-none"
-              >
-                Beta
-              </span>
-              <textarea
-                className="w-full bg-transparent border-none outline-none text-primary placeholder:text-primary/50 resize-none"
-                placeholder="What are your trying to send out today?"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    if (input.trim() && !isGenerating) {
-                      // Trigger the same action as the submit button
-                      if (token) {
-                        try {
-                          const init = {
-                            input: input.trim(),
-                            messages: messages
-                          };
-                          sessionStorage.setItem('linkmail_chat_init', JSON.stringify(init));
-                        } catch {}
-                        router.push('/dashboard/chat');
-                      }
-                    }
-                  }
-                }}
-                rows={3}
-              ></textarea>
-              
-              <div className="w-full flex flex-row gap-2 justify-between">
-
-                <div className="flex flex-row gap-2"> 
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button className="flex flex-row gap-2 items-center bg-none border border-border text-sm text-secondary hover:bg-secondary/10 cursor-pointer px-2.5 py-1.5 rounded-xl transition">
-                        {mode === 'draft' && <PencilRuler className="w-4 h-4" />}
-                        {mode === 'find' && <Search className="w-4 h-4" />}
-                        {mode === 'agent' && <Bot className="w-4 h-4" />}
-                        <p>{mode === 'draft' ? 'Draft' : mode === 'find' ? 'Find' : 'Agent'}</p>
-                        <ChevronDown className="w-4 h-4" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="w-48" sideOffset={8}>
-                      <DropdownMenuItem className="cursor-pointer" onSelect={() => setMode('draft')}>
-                        <PencilRuler className="w-4 h-4 mr-2" />
-                        Draft
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-not-allowed" disabled>
-                        <Search className="w-4 h-4 mr-2" />
-                        Find
-                        <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded-full bg-border text-secondary">Coming soon</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-not-allowed" disabled>
-                        <Bot className="w-4 h-4 mr-2" />
-                        Agent
-                        <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded-full bg-border text-secondary">Coming soon</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-                
-                <button
-                  className="bg-opposite hover:bg-opposite/80 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer text-background font-semibold rounded-lg transition p-2"
-                  disabled={!input.trim() || isGenerating}
-                  onClick={async () => {
-                    if (!token) return;
-                    try {
-                      // stash initial state and navigate to chat page
-                      const init = {
-                        input: input.trim(),
-                        messages: messages
-                      };
-                      sessionStorage.setItem('linkmail_chat_init', JSON.stringify(init));
-                    } catch {}
-                    router.push('/dashboard/chat');
-                  }}
-                >
-                  {isGenerating ? (
-                    <div className="h-4 w-4 border-2 border-background border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <ArrowRight className="w-4 h-4" />
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {(!profile || !getProfileSetupStatus().isSetupComplete) && !isGeneratedView && (
+          {(!profile || !getProfileSetupStatus().isSetupComplete) && (
             <div className="relative w-full bg-gradient-to-br from-blue-50 via-indigo-100 to-violet-100 dark:bg-gradient-to-br dark:from-[#204B9C] dark:via-[#162B69] dark:to-[#162B69] dark:border-slate-800 rounded-3xl p-4 mb-6 overflow-hidden group transition-all duration-300 mt-4">
               <div className="flex items-center gap-4">
                 <div className="ml-2 flex-1">
@@ -309,66 +217,6 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-          )}
-
-          {/* Persistent Reachouts card */}
-          {!connectionsLoading && (
-            <div className="relative w-full bg-foreground rounded-3xl p-5 mb-6 overflow-hidden transition-all duration-300">
-            <div className="flex items-center gap-6">
-              <div className="flex-1">
-                <div className="text-sm text-primary py-4">
-                  <h2 className="text-base font-semibold pb-1">Weekly Streak</h2>
-                  <p className="opacity-60 mb-4">Keep sending outreach and keep the momentum going!</p>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      window.open(
-                        'https://www.linkedin.com/feed/',
-                        '_blank',
-                        'noopener,noreferrer'
-                      )
-                    }
-                    className="flex items-center bg-white/70 hover:bg-white/55 dark:bg-white/10 dark:hover:bg-white/20 cursor-pointer text-black/70 dark:text-slate-100 px-4 py-2 rounded-xl text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  >
-                    <img
-                      src="/linkedin.png"
-                      alt="LinkedIn"
-                      className="w-4 h-4 mr-3"
-                    />
-                    <span className="inline-flex items-center gap-2">Open LinkedIn</span>
-                  </button>
-                </div>
-              </div>
-              <div className="flex flex-col justify-center items-end px-3 py-2">
-                <div className="flex flex-row items-center">
-                  <Flame
-                    className="w-8 h-8 mr-1 text-transparent"
-                    style={{
-                      stroke: "none",
-                      fill: "url(#flame-gradient)",
-                    }}
-                  />
-                  <svg width="0" height="0">
-                    <defs>
-                      <linearGradient
-                        id="flame-gradient"
-                        x1="0%"
-                        y1="0%"
-                        x2="0%"
-                        y2="100%"
-                      >
-                        <stop offset="0%" stopColor="#3b82f6" />
-                        <stop offset="100%" stopColor="#6366f1" />
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                  <div className="text-4xl font-semibold text-primary leading-none">
-                    {reachoutCount}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
           )}
 
 
