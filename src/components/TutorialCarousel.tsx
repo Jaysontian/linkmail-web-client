@@ -109,11 +109,11 @@ export function TutorialCarousel({ isOpen, onClose }: TutorialCarouselProps) {
     {
       id: 3,
       title: "Send Your First Linkmail",
-      description: "Now it's your turn! Send a real outreach email to Jayson in under 10 seconds. Just click below to try the full AI workflow on a real LinkedIn profile.",
+      description: "Now it's your turn! Send a real outreach email to Ishaan in under 10 seconds. Just click below to try the full AI workflow on a real LinkedIn profile.",
       needButton: true,
-      buttonText: "Send Jayson a Message",
+      buttonText: "Send Ishaan a Message",
       buttonAction: () => {
-        window.open('https://www.linkedin.com/in/jaysontian/', '_blank');
+        window.open('https://www.linkedin.com/in/ishaangpta/', '_blank');
       },
       icon: '/linkedin.png',
       image: '/demo_small.webm',

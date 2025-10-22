@@ -22,6 +22,32 @@ export default function ChatPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [draft, setDraft] = useState<string | null>(null);
   const [mode, setMode] = useState<'draft' | 'find' | 'agent'>('draft');
+  const [thinkingMessage, setThinkingMessage] = useState<string>('');
+
+  const thinkingMessages = [
+    "cooking for you...",
+    "drafting...",
+    "brewing it up...",
+    "crafting your message...",
+    "thinking...",
+    "writing magic..."
+  ];
+
+  const startThinking = () => {
+    setIsGenerating(true);
+    setThinkingMessage(thinkingMessages[Math.floor(Math.random() * thinkingMessages.length)]);
+    
+    // Cycle through messages every 1.5 seconds
+    const interval = setInterval(() => {
+      setThinkingMessage(prev => {
+        const currentIndex = thinkingMessages.indexOf(prev);
+        const nextIndex = (currentIndex + 1) % thinkingMessages.length;
+        return thinkingMessages[nextIndex];
+      });
+    }, 1500);
+
+    return () => clearInterval(interval);
+  };
 
   useEffect(() => {
     try {
@@ -34,16 +60,18 @@ export default function ChatPage() {
         if (safeInput) setInput(safeInput);
         if (safeInput && token) {
           (async () => {
-            setIsGenerating(true);
             const nextMessages: ChatMessage[] = [...safeMessages, { role: 'user', content: safeInput }];
             setMessages(nextMessages);
+            const stopThinking = startThinking();
             const res = await generateDraft(token, { prompt: safeInput, context: { history: nextMessages } });
             if (res.success && res.data?.draft) {
               const assistantMsg = { role: 'assistant' as const, content: res.data.draft };
               setMessages([...nextMessages, assistantMsg]);
               setDraft(res.data.draft);
             }
+            stopThinking();
             setIsGenerating(false);
+            setThinkingMessage('');
             setInput('');
           })();
         }
@@ -58,28 +86,42 @@ export default function ChatPage() {
     }
   }, [isLoading, isAuthenticated, router]);
 
+  // Auto-resize textarea when draft content changes
+  useEffect(() => {
+    const textarea = document.querySelector('textarea[placeholder="Your drafted email..."]') as HTMLTextAreaElement;
+    if (textarea && draft) {
+      textarea.style.height = 'auto';
+      textarea.style.height = textarea.scrollHeight + 'px';
+    }
+  }, [draft]);
+
   return (
     <div className="max-w-xl mx-auto flex flex-col overflow-x-hidden relative pt-20">
       {/* Top fade - fixed at top of page */}
       <div className="fixed top-0 left-0 right-0 h-16 bg-gradient-to-b from-background to-transparent z-10 pointer-events-none" style={{ left: leftOffsetPx }} />
       
       <div className="w-full px-0 pb-40 pt-2">
-        <div className="w-full mt-2 flex flex-col gap-3">
+        <div className="w-full mt-2 flex flex-col gap-4">
           {messages.map((m, idx) => {
             const isAssistant = m.role === 'assistant';
             const isLatestAssistant = isAssistant && messages.slice().reverse().find(mm => mm.role === 'assistant') === m;
             return (
               <div key={idx} className={`${isAssistant ? '' : 'flex justify-end'}`}>
-                <div className={`${isAssistant ? 'w-full' : 'bg-foreground text-primary border border-border w-fit'} rounded-2xl p-2 px-4 max-w-full text-sm`}>
+                <div className={`${isAssistant ? 'w-full bg-foreground py-4' : 'bg-accent text-primary w-fit py-2'} rounded-3xl px-4 max-w-full text-sm`}>
                   {isAssistant ? (
                     isLatestAssistant ? (
                       <div className="flex flex-col gap-2">
                         <textarea
-                          className="w-full bg-transparent border-none outline-none text-primary placeholder:text-primary/50 min-h-[180px] resize-none"
+                          className="w-full bg-transparent border-none outline-none text-primary placeholder:text-primary/50 resize-none overflow-hidden"
                           value={draft ?? m.content}
-                          onChange={(e) => setDraft(e.target.value)}
+                          onChange={(e) => {
+                            setDraft(e.target.value);
+                            // Auto-resize textarea
+                            e.target.style.height = 'auto';
+                            e.target.style.height = e.target.scrollHeight + 'px';
+                          }}
                           placeholder="Your drafted email..."
-                          rows={8}
+                          style={{ minHeight: '120px' }}
                         />
                         <div className="flex items-center justify-end">
                           <button
@@ -109,6 +151,22 @@ export default function ChatPage() {
               </div>
             );
           })}
+          
+          {/* Thinking indicator */}
+          {isGenerating && thinkingMessage && (
+            <div className="flex justify-start">
+              <div className="w-full bg-foreground rounded-3xl p-2 px-4 max-w-full text-sm">
+                <div className="flex items-center gap-2 text-primary/70">
+                  <div className="flex space-x-1">
+                    <div className="w-1 h-1 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                    <div className="w-1 h-1 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                    <div className="w-1 h-1 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                  </div>
+                  <span className="text-sm">{thinkingMessage}</span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
       
@@ -128,18 +186,20 @@ export default function ChatPage() {
                 e.preventDefault();
                 const currentInput = input.trim();
                 setInput(''); // Clear textarea immediately
-                setIsGenerating(true);
                 const userMsg: ChatMessage = { role: 'user', content: currentInput };
                 const nextMessages: ChatMessage[] = [...messages, userMsg];
                 setMessages(nextMessages);
                 setDraft(null);
+                const stopThinking = startThinking();
                 generateDraft(token!, { prompt: currentInput, context: { history: nextMessages } }).then((res) => {
                   if (res.success && res.data?.draft) {
                     const assistantMsg: ChatMessage = { role: 'assistant', content: res.data.draft };
                     setMessages([...nextMessages, assistantMsg]);
                     setDraft(res.data.draft);
                   }
+                  stopThinking();
                   setIsGenerating(false);
+                  setThinkingMessage('');
                 });
               }
             }}
@@ -184,18 +244,20 @@ export default function ChatPage() {
                 if (!token) return;
                 const currentInput = input.trim();
                 setInput(''); // Clear textarea immediately
-                setIsGenerating(true);
                 const userMsg: ChatMessage = { role: 'user', content: currentInput };
                 const nextMessages: ChatMessage[] = [...messages, userMsg];
                 setMessages(nextMessages);
                 setDraft(null);
+                const stopThinking = startThinking();
                 const res = await generateDraft(token, { prompt: currentInput, context: { history: nextMessages } });
                 if (res.success && res.data?.draft) {
                   const assistantMsg: ChatMessage = { role: 'assistant', content: res.data.draft };
                   setMessages([...nextMessages, assistantMsg]);
                   setDraft(res.data.draft);
                 }
+                stopThinking();
                 setIsGenerating(false);
+                setThinkingMessage('');
               }}
             >
               {isGenerating ? (

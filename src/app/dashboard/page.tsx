@@ -4,8 +4,9 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useRouter } from 'next/navigation';
-import { ChevronRight, PencilRuler, Search, ArrowRight, ChevronDown, Bot } from 'lucide-react';
+import { ChevronRight, PencilRuler, Search, ArrowRight, ChevronDown, Bot, ArrowUpRight, Flame } from 'lucide-react';
 import { saveTemplate } from '@/lib/api';
+import { useConnections } from '@/hooks/useConnections';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { TutorialCarousel } from '@/components/TutorialCarousel';
 
@@ -13,6 +14,7 @@ export default function Dashboard() {
   const { user, token, isLoading, isAuthenticated } = useAuth();
   const { profile, isLoading: profileLoading, getProfileSetupStatus, updateProfile } = useUserProfile();
   const router = useRouter();
+  const { count: reachoutCount, isLoading: connectionsLoading } = useConnections();
   const [showSuccess, setShowSuccess] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
   const [mode, setMode] = useState<'draft' | 'find' | 'agent'>('draft');
@@ -108,20 +110,22 @@ export default function Dashboard() {
   return (
     <div className="max-w-xl mx-auto flex flex-col overflow-x-hidden pt-20">
 
-          {/* Welcome Header */}
-          <div className="w-full mb-4 pt-6 sticky top-0 z-10 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="text-sm text-secondary mb-8 mx-auto w-fit bg-foreground px-4 py-1 rounded-lg">Premium Tier ・ <a href="/dashboard/settings" className="hover:underline">Manage</a></div>
-            <h1 className="text-4xl font-tiempos text-primary text-center flex-1 flex items-center justify-center">
-              {isGenerating
-                ? 'Cooking...'
-                : (isGeneratedView
-                    ? `Here you go, ${user?.name?.split(' ')[0] || 'there'}`
-                    : `Welcome, ${user?.name?.split(' ')[0] || 'there'}.`)}
-            </h1>
-          </div>
+        {/* Welcome Header */}
+        <div className="w-full mb-4 pt-6 sticky top-0 z-10 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="text-sm text-secondary mb-8 mx-auto w-fit bg-foreground px-4 py-1 rounded-lg">Premium Tier ・ <a href="/dashboard/settings" className="hover:underline">Manage</a></div>
+          <h1 className="text-4xl font-tiempos text-primary text-center flex-1 flex items-center justify-center">
+            {isGenerating
+              ? 'Cooking...'
+              : (isGeneratedView
+                  ? `Here you go, ${user?.name?.split(' ')[0] || 'there'}`
+                  : `Welcome, ${user?.name?.split(' ')[0] || 'there'}.`)}
+          </h1>
+        </div>
 
-          {/* Content area scrolls with page; header and composer remain sticky */}
-          <div className="w-full px-0 pb-24 pt-2 mt-16">
+        {/* Content area scrolls with page; header and composer remain sticky */}
+        <div className="w-full px-0 pb-24 pt-2 mt-16">
+          
+          
           {isGeneratedView && (
             <div className="w-full mt-2 flex flex-col gap-3">
               {messages.map((m, idx) => {
@@ -184,6 +188,24 @@ export default function Dashboard() {
                 placeholder="What are your trying to send out today?"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    if (input.trim() && !isGenerating) {
+                      // Trigger the same action as the submit button
+                      if (token) {
+                        try {
+                          const init = {
+                            input: input.trim(),
+                            messages: messages
+                          };
+                          sessionStorage.setItem('linkmail_chat_init', JSON.stringify(init));
+                        } catch {}
+                        router.push('/dashboard/chat');
+                      }
+                    }
+                  }
+                }}
                 rows={3}
               ></textarea>
               
@@ -246,9 +268,9 @@ export default function Dashboard() {
           </div>
 
           {(!profile || !getProfileSetupStatus().isSetupComplete) && !isGeneratedView && (
-            <div className="relative w-full bg-gradient-to-br from-blue-50 via-indigo-100 to-violet-100 border border-blue-100 dark:bg-gradient-to-br dark:from-[#204B9C] dark:via-[#162B69] dark:to-[#162B69] dark:border-slate-800 rounded-3xl p-4 mb-6 overflow-hidden group transition-all duration-300">
+            <div className="relative w-full bg-gradient-to-br from-blue-50 via-indigo-100 to-violet-100 dark:bg-gradient-to-br dark:from-[#204B9C] dark:via-[#162B69] dark:to-[#162B69] dark:border-slate-800 rounded-3xl p-4 mb-6 overflow-hidden group transition-all duration-300 mt-4">
               <div className="flex items-center gap-4">
-                <div className="ml-3 flex-1">
+                <div className="ml-2 flex-1">
                   <div className="mt-2 text-sm max-w-xl text-primary dark:text-white">
                     <h2 className="text-[12pt] font-bold text-primary pb-2">Personalize Your Profile</h2>
                     <p className="opacity-50 mr-4">Linkmail crafts the best email when you provide context on your professional background.</p>
@@ -256,7 +278,7 @@ export default function Dashboard() {
                   <div className="mt-4">
                     <button
                       onClick={() => router.push('/dashboard/profile')}
-                      className="bg-white/65 hover:bg-white/45 dark:bg-white/10 dark:hover:bg-white/20 cursor-pointer text-black/65 dark:text-slate-100 px-2 pl-4 py-2 rounded-2xl text-sm font-medium transition-all duration-300 group/button relative overflow-hidden"
+                      className="bg-white/65 hover:bg-white/45 dark:bg-white/10 dark:hover:bg-white/20 cursor-pointer text-black/65 dark:text-slate-100 px-2 pl-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 group/button relative overflow-hidden"
                     >
                       <div className="relative z-10 flex items-center w-[100px]">
                         <div className="translate-x-2 group-hover/button:translate-x-0 w-fit line-clamp-1 transition-all duration-300 transform">
@@ -269,8 +291,8 @@ export default function Dashboard() {
                 </div>
                 <div className="flex flex-col items-center">
                   <div className="w-[100px] h-[100px] rounded-xl bg-white/75 dark:bg-white/10 from-blue-200/30 to-indigo-300/40 dark:from-slate-700/40 dark:to-slate-900/40 border border-white/20 dark:border-slate-700/40 shadow-lg group-hover:rotate-12 group-hover:-translate-y-2 group-hover:scale-105 transition-all duration-300 ease-out">
-                    <div className="w-full h-full flex items-center justify-center text-blue-600 dark:text-blue-300 font-bold text-lg">
-                      {getProfileSetupStatus().setupPercentage}%
+                    <div className="font-tiempos w-full h-full flex items-center justify-center text-blue-600 dark:text-blue-300 font-bold text-2xl">
+                      {getProfileSetupStatus().setupPercentage} <span className="font-serif ml-1">%</span> 
                     </div>
                   </div>
                 </div>
@@ -288,6 +310,68 @@ export default function Dashboard() {
               </div>
             </div>
           )}
+
+          {/* Persistent Reachouts card */}
+          {!connectionsLoading && (
+            <div className="relative w-full bg-foreground rounded-3xl p-5 mb-6 overflow-hidden transition-all duration-300">
+            <div className="flex items-center gap-6">
+              <div className="flex-1">
+                <div className="text-sm text-primary py-4">
+                  <h2 className="text-base font-semibold pb-1">Weekly Streak</h2>
+                  <p className="opacity-60 mb-4">Keep sending outreach and keep the momentum going!</p>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      window.open(
+                        'https://www.linkedin.com/feed/',
+                        '_blank',
+                        'noopener,noreferrer'
+                      )
+                    }
+                    className="flex items-center bg-white/70 hover:bg-white/55 dark:bg-white/10 dark:hover:bg-white/20 cursor-pointer text-black/70 dark:text-slate-100 px-4 py-2 rounded-xl text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  >
+                    <img
+                      src="/linkedin.png"
+                      alt="LinkedIn"
+                      className="w-4 h-4 mr-3"
+                    />
+                    <span className="inline-flex items-center gap-2">Open LinkedIn</span>
+                  </button>
+                </div>
+              </div>
+              <div className="flex flex-col justify-center items-end px-3 py-2">
+                <div className="flex flex-row items-center">
+                  <Flame
+                    className="w-8 h-8 mr-1 text-transparent"
+                    style={{
+                      stroke: "none",
+                      fill: "url(#flame-gradient)",
+                    }}
+                  />
+                  <svg width="0" height="0">
+                    <defs>
+                      <linearGradient
+                        id="flame-gradient"
+                        x1="0%"
+                        y1="0%"
+                        x2="0%"
+                        y2="100%"
+                      >
+                        <stop offset="0%" stopColor="#3b82f6" />
+                        <stop offset="100%" stopColor="#6366f1" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                  <div className="text-4xl font-semibold text-primary leading-none">
+                    {reachoutCount}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          )}
+
+
           </div>
           
           {/* Tutorial Carousel */}
