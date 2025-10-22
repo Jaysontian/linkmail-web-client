@@ -463,7 +463,7 @@ export default function TemplatesPage() {
                         <div className="flex items-start gap-2">
                           <span className="text-accent mt-0.5">•</span>
                           <span className="text-sm text-primary flex-1">
-                            [Mention something specific about the recipient's current company that is interesting]
+                            [Mention something specific about the recipient&apos;s current company that is interesting]
                           </span>
                         </div>
                       </div>
@@ -482,7 +482,7 @@ export default function TemplatesPage() {
                         <div className="flex items-start gap-2">
                           <span className="text-accent mt-0.5">•</span>
                           <span className="text-sm text-primary flex-1">
-                            [Insert personal experience that is similar to recipient's work]
+                            [Insert personal experience that is similar to recipient&apos;s work]
                           </span>
                         </div>
                       </div>

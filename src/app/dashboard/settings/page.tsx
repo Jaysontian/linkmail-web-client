@@ -36,11 +36,12 @@ export default function SettingsPage() {
         try {
           const response = await apiClient.getEmailFinderUsage();
           if (response.success && response.data) {
+            const data = response.data as { current?: number; limit?: number; remaining?: number; hasReachedLimit?: boolean };
             setEmailFinderUsage({
-              current: response.data.current || 0,
-              limit: response.data.limit || 50,
-              remaining: response.data.remaining || 0,
-              hasReachedLimit: response.data.hasReachedLimit || false
+              current: data.current || 0,
+              limit: data.limit || 50,
+              remaining: data.remaining || 0,
+              hasReachedLimit: data.hasReachedLimit || false
             });
           }
         } catch (error) {
