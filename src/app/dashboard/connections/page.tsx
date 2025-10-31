@@ -255,9 +255,18 @@ export default function ConnectionsPage() {
 
                 {/* Company and Role */}
                 <div className="space-y-1 text-start">
-                  <p className="text-[10pt] text-secondary">
-                    {connection.job_title} @ {connection.company}
-                  </p>
+                  {(() => {
+                    const titleRaw = connection.job_title || '';
+                    const titleClean = titleRaw.trim();
+                    const isAmbiguous = titleClean.length === 0 || titleClean.toLowerCase() === 'other' || titleClean.toLowerCase() === 'unknown' || titleClean.toLowerCase() === 'n/a' || titleClean.toLowerCase() === 'na';
+                    const companyClean = (connection.company || '').trim();
+                    const text = !isAmbiguous && titleClean && companyClean
+                      ? `${titleClean} @ ${companyClean}`
+                      : companyClean || titleClean;
+                    return (
+                      <p className="text-[10pt] text-secondary">{text}</p>
+                    );
+                  })()}
                 </div>
               </div>
 
