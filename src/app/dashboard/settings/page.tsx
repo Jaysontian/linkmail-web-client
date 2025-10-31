@@ -477,7 +477,7 @@ export default function SettingsPage() {
                             ) : (
                               <div className="mt-4 p-3 bg-accent/5 border border-accent/10 rounded-lg">
                                 <p className="text-sm text-secondary">
-                                  Share your referral link with friends. When 3 people install the extension using your link, you&apos;ll automatically be upgraded to Premium Plus (50 email lookups)!
+                                  Share your referral link with friends. When 3 people sign up with Google using your link, you&apos;ll automatically be upgraded to Premium Plus (50 email lookups)!
                                 </p>
                               </div>
                             )}
