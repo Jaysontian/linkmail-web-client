@@ -125,6 +125,22 @@ class ApiClient {
     return this.request('/api/user/apollo-usage');
   }
 
+  // Referral endpoints
+  async getReferralData() {
+    return this.request('/api/referrals/code');
+  }
+
+  async trackReferralInstall(referralCode: string) {
+    return this.request('/api/referrals/track-install', {
+      method: 'POST',
+      body: JSON.stringify({ referralCode }),
+    });
+  }
+
+  async getReferralHistory() {
+    return this.request('/api/referrals/history');
+  }
+
   // Email endpoints
   async getEmailHistory() {
     return this.request('/api/email/history');

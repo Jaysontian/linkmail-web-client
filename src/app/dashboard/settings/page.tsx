@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, CreditCard, Zap } from 'lucide-react';
+import { User, CreditCard, Zap, Copy, Check, Users } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
 import Image from 'next/image';
 import { apiClient } from '@/lib/api';
@@ -21,8 +21,15 @@ export default function SettingsPage() {
     hasReachedLimit: boolean;
   } | null>(null);
   const [loadingEmailFinder, setLoadingEmailFinder] = useState(false);
-  const [showReferralModal, setShowReferralModal] = useState(false);
-  const [referralEmails, setReferralEmails] = useState(['', '', '']);
+  const [referralData, setReferralData] = useState<{
+    referralCode: string;
+    referralLink: string;
+    stats: { completed: number; pending: number; remaining: number };
+    currentPlan: string;
+    hasUnlockedPremiumPlus: boolean;
+  } | null>(null);
+  const [loadingReferral, setLoadingReferral] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -30,17 +37,12 @@ export default function SettingsPage() {
     }
   }, [isLoading, isAuthenticated, router]);
 
-  const handleReferralSubmit = () => {
-    // TODO: Add API call to submit referral emails
-    console.log('Referral emails:', referralEmails);
-    setShowReferralModal(false);
-    setReferralEmails(['', '', '']);
-  };
-
-  const handleEmailChange = (index: number, value: string) => {
-    const newEmails = [...referralEmails];
-    newEmails[index] = value;
-    setReferralEmails(newEmails);
+  const copyReferralLink = async () => {
+    if (referralData?.referralLink) {
+      await navigator.clipboard.writeText(referralData.referralLink);
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2000);
+    }
   };
 
   // Fetch email finder usage when subscription tab is active
@@ -68,6 +70,27 @@ export default function SettingsPage() {
     };
 
     fetchEmailFinderUsage();
+  }, [activeTab, isAuthenticated]);
+
+  // Fetch referral data when subscription tab is active
+  useEffect(() => {
+    const fetchReferralData = async () => {
+      if (activeTab === 'subscription' && isAuthenticated) {
+        setLoadingReferral(true);
+        try {
+          const response = await apiClient.getReferralData();
+          if (response.success && response.data) {
+            setReferralData(response.data);
+          }
+        } catch (error) {
+          console.error('Error fetching referral data:', error);
+        } finally {
+          setLoadingReferral(false);
+        }
+      }
+    };
+
+    fetchReferralData();
   }, [activeTab, isAuthenticated]);
 
   if (isLoading) {
@@ -353,15 +376,110 @@ export default function SettingsPage() {
                         )}
                       </div>
 
-                      {/* Referral Button */}
-                      <div className="mt-6">
-                        <button
-                          onClick={() => setShowReferralModal(true)}
-                          className="w-full px-6 py-4 bg-accent hover:bg-accent-light text-white rounded-xl font-medium transition-all duration-200 shadow-sm hover:shadow-md flex items-center justify-center gap-2"
-                        >
-                          <Zap className="w-5 h-5" />
-                          Refer 3 Friends to Upgrade to Premium Plus
-                        </button>
+                      {/* Referral Program Card */}
+                      <div className="bg-foreground border border-border rounded-xl p-6 shadow-sm">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2.5 bg-accent/10 rounded-lg">
+                              <Users className="w-5 h-5 text-accent" />
+                            </div>
+                            <div>
+                              <h3 className="text-lg font-medium text-primary">
+                                Referral Program
+                              </h3>
+                              <p className="text-sm text-tertiary mt-0.5">
+                                Refer 3 friends to unlock Premium Plus
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {loadingReferral ? (
+                          <div className="flex items-center justify-center py-8">
+                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-accent"></div>
+                          </div>
+                        ) : referralData ? (
+                          <div className="space-y-4">
+                            {/* Referral Stats */}
+                            <div className="flex items-center justify-between p-4 bg-background rounded-lg">
+                              <div>
+                                <p className="text-sm text-secondary mb-1">Successful Referrals</p>
+                                <div className="flex items-baseline gap-2">
+                                  <span className="text-2xl font-newsreader-500 text-primary">
+                                    {referralData.stats.completed}
+                                  </span>
+                                  <span className="text-lg text-tertiary">/ 3</span>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-sm text-secondary mb-1">Remaining</p>
+                                <span className="text-2xl font-newsreader-500 text-primary">
+                                  {referralData.stats.remaining}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Progress Bar */}
+                            <div className="space-y-2">
+                              <div className="w-full h-2.5 bg-background rounded-full overflow-hidden">
+                                <div
+                                  className="h-full rounded-full transition-all duration-500 bg-accent"
+                                  style={{ width: `${Math.min((referralData.stats.completed / 3) * 100, 100)}%` }}
+                                />
+                              </div>
+                            </div>
+
+                            {/* Referral Link */}
+                            <div>
+                              <label className="block text-sm font-medium text-secondary mb-2">
+                                Your Referral Link
+                              </label>
+                              <div className="flex gap-2">
+                                <input
+                                  type="text"
+                                  value={referralData.referralLink}
+                                  readOnly
+                                  className="flex-1 px-4 py-3 bg-background text-secondary border border-border rounded-lg text-sm font-mono"
+                                />
+                                <button
+                                  onClick={copyReferralLink}
+                                  className="px-4 py-3 bg-accent hover:bg-accent-light text-white rounded-lg transition-all duration-200 flex items-center gap-2"
+                                >
+                                  {copiedLink ? (
+                                    <>
+                                      <Check className="w-4 h-4" />
+                                      Copied
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Copy className="w-4 h-4" />
+                                      Copy
+                                    </>
+                                  )}
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* Status Message */}
+                            {referralData.hasUnlockedPremiumPlus ? (
+                              <div className="mt-4 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
+                                <p className="text-sm text-green-600 dark:text-green-400">
+                                  🎉 Congratulations! You&apos;ve unlocked Premium Plus with {referralData.stats.completed} referrals!
+                                </p>
+                              </div>
+                            ) : (
+                              <div className="mt-4 p-3 bg-accent/5 border border-accent/10 rounded-lg">
+                                <p className="text-sm text-secondary">
+                                  Share your referral link with friends. When 3 people install the extension using your link, you&apos;ll automatically be upgraded to Premium Plus (50 email lookups)!
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="text-center py-4">
+                            <p className="text-sm text-tertiary">Unable to load referral data</p>
+                          </div>
+                        )}
                       </div>
 
                       {/* Subscription Management Placeholder */}
@@ -383,72 +501,6 @@ export default function SettingsPage() {
             </div>
           </div>
         </div>
-
-      {/* Referral Modal */}
-      <AnimatePresence>
-        {showReferralModal && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowReferralModal(false)}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
-            />
-            
-            {/* Modal */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-foreground border border-border rounded-2xl shadow-2xl z-50 p-6"
-            >
-              <div className="mb-6">
-                <h2 className="text-2xl font-newsreader-500 text-primary mb-2">
-                  Refer Friends to Premium Plus
-                </h2>
-                <p className="text-sm text-secondary">
-                  Enter the email addresses of 3 friends you&apos;d like to refer to unlock Premium Plus benefits.
-                </p>
-              </div>
-
-              <div className="space-y-4 mb-6">
-                {[0, 1, 2].map((index) => (
-                  <div key={index}>
-                    <label className="block text-sm font-medium text-secondary mb-2">
-                      Friend {index + 1} Email
-                    </label>
-                    <input
-                      type="email"
-                      value={referralEmails[index]}
-                      onChange={(e) => handleEmailChange(index, e.target.value)}
-                      placeholder={`friend${index + 1}@example.com`}
-                      className="w-full px-4 py-3 bg-background text-primary border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
-                    />
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setShowReferralModal(false)}
-                  className="flex-1 px-4 py-3 bg-background hover:bg-selection text-secondary border border-border rounded-lg font-medium transition-all duration-200"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleReferralSubmit}
-                  className="flex-1 px-4 py-3 bg-accent hover:bg-accent-light text-white rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow-md"
-                >
-                  Continue
-                </button>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
