@@ -21,12 +21,27 @@ export default function SettingsPage() {
     hasReachedLimit: boolean;
   } | null>(null);
   const [loadingEmailFinder, setLoadingEmailFinder] = useState(false);
+  const [showReferralModal, setShowReferralModal] = useState(false);
+  const [referralEmails, setReferralEmails] = useState(['', '', '']);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       router.push('/');
     }
   }, [isLoading, isAuthenticated, router]);
+
+  const handleReferralSubmit = () => {
+    // TODO: Add API call to submit referral emails
+    console.log('Referral emails:', referralEmails);
+    setShowReferralModal(false);
+    setReferralEmails(['', '', '']);
+  };
+
+  const handleEmailChange = (index: number, value: string) => {
+    const newEmails = [...referralEmails];
+    newEmails[index] = value;
+    setReferralEmails(newEmails);
+  };
 
   // Fetch email finder usage when subscription tab is active
   useEffect(() => {
@@ -338,6 +353,17 @@ export default function SettingsPage() {
                         )}
                       </div>
 
+                      {/* Referral Button */}
+                      <div className="mt-6">
+                        <button
+                          onClick={() => setShowReferralModal(true)}
+                          className="w-full px-6 py-4 bg-accent hover:bg-accent-light text-white rounded-xl font-medium transition-all duration-200 shadow-sm hover:shadow-md flex items-center justify-center gap-2"
+                        >
+                          <Zap className="w-5 h-5" />
+                          Refer 3 Friends to Upgrade to Premium Plus
+                        </button>
+                      </div>
+
                       {/* Subscription Management Placeholder */}
                       <div className="text-center py-12">
                         <div className="mx-auto w-24 h-24 bg-foreground rounded-full flex items-center justify-center mb-4">
@@ -357,6 +383,72 @@ export default function SettingsPage() {
             </div>
           </div>
         </div>
+
+      {/* Referral Modal */}
+      <AnimatePresence>
+        {showReferralModal && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowReferralModal(false)}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+            />
+            
+            {/* Modal */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-foreground border border-border rounded-2xl shadow-2xl z-50 p-6"
+            >
+              <div className="mb-6">
+                <h2 className="text-2xl font-newsreader-500 text-primary mb-2">
+                  Refer Friends to Premium Plus
+                </h2>
+                <p className="text-sm text-secondary">
+                  Enter the email addresses of 3 friends you&apos;d like to refer to unlock Premium Plus benefits.
+                </p>
+              </div>
+
+              <div className="space-y-4 mb-6">
+                {[0, 1, 2].map((index) => (
+                  <div key={index}>
+                    <label className="block text-sm font-medium text-secondary mb-2">
+                      Friend {index + 1} Email
+                    </label>
+                    <input
+                      type="email"
+                      value={referralEmails[index]}
+                      onChange={(e) => handleEmailChange(index, e.target.value)}
+                      placeholder={`friend${index + 1}@example.com`}
+                      className="w-full px-4 py-3 bg-background text-primary border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowReferralModal(false)}
+                  className="flex-1 px-4 py-3 bg-background hover:bg-selection text-secondary border border-border rounded-lg font-medium transition-all duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleReferralSubmit}
+                  className="flex-1 px-4 py-3 bg-accent hover:bg-accent-light text-white rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow-md"
+                >
+                  Continue
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
