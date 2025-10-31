@@ -23,8 +23,15 @@ export function LoginButton({ expanded = false }: LoginButtonProps) {
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   const handleLogin = () => {
-    // Redirect to backend OAuth flow
-    window.location.href = getOAuthUrl();
+    // Get referral code from localStorage if present
+    const ref = localStorage.getItem('linkmail_referral_code');
+    
+    // Redirect to backend OAuth flow with referral code
+    let oauthUrl = getOAuthUrl();
+    if (ref) {
+      oauthUrl += `&ref=${ref}`;
+    }
+    window.location.href = oauthUrl;
   };
 
   const calculateDropdownPosition = () => {
