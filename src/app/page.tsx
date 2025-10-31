@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, Suspense } from "react";
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { LoginButton } from '@/components/LoginButton';
 import { useAuth } from '@/hooks/useAuth';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { getOAuthUrl } from '@/lib/api';
 import AnimatedPathText from '@/components/fancy/text/text-along-path';
 import ScrambleIn, { ScrambleInHandle } from '@/components/fancy/text/scramble-in';
@@ -42,6 +42,21 @@ function CyclingScrambleText({ texts, interval = 4000 }: { texts: string[], inte
   );
 }
 
+// Component to capture referral code from URL
+function ReferralCapture() {
+  const searchParams = useSearchParams();
+  
+  useEffect(() => {
+    const ref = searchParams.get('ref');
+    if (ref) {
+      localStorage.setItem('linkmail_referral_code', ref);
+      console.log('[HomePage] Stored referral code:', ref);
+    }
+  }, [searchParams]);
+
+  return null;
+}
+
 export default function Home() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
@@ -52,8 +67,15 @@ export default function Home() {
   };
 
   const handleTryForFree = () => {
-    // Redirect to backend OAuth flow
-    window.location.href = getOAuthUrl();
+    // Get referral code from localStorage if present
+    const ref = localStorage.getItem('linkmail_referral_code');
+    
+    // Redirect to backend OAuth flow with referral code
+    let oauthUrl = getOAuthUrl();
+    if (ref) {
+      oauthUrl += `&ref=${ref}`;
+    }
+    window.location.href = oauthUrl;
   };
 
   const networkerTexts = [
@@ -76,6 +98,11 @@ export default function Home() {
 
   return (
     <div>
+      {/* Capture referral code from URL */}
+      <Suspense fallback={null}>
+        <ReferralCapture />
+      </Suspense>
+      
     <div className="min-h-screen bg-background px-4 sm:px-6 lg:px-8 py-2">
       <header>
         <div className="mx-auto max-w-7xl">
