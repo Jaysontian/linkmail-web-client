@@ -80,7 +80,14 @@ export default function SettingsPage() {
         try {
           const response = await apiClient.getReferralData();
           if (response.success && response.data) {
-            setReferralData(response.data);
+            const data = response.data as any;
+            setReferralData({
+              referralCode: data.referralCode || '',
+              referralLink: data.referralLink || '',
+              stats: data.stats || { completed: 0, pending: 0, remaining: 3 },
+              currentPlan: data.currentPlan || 'Premium Tier',
+              hasUnlockedPremiumPlus: data.hasUnlockedPremiumPlus || false
+            });
           }
         } catch (error) {
           console.error('Error fetching referral data:', error);
