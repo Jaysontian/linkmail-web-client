@@ -116,7 +116,7 @@ export default function Dashboard() {
           {/* Weekly Streak - moved from below */}
           {!connectionsLoading && (
             <div className="w-full sticky bottom-0 z-10 bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/70 pt-2 pb-4">
-              <div className="relative w-full bg-foreground rounded-3xl p-5 overflow-hidden transition-all duration-300">
+              <div className="relative w-full bg-foreground rounded-3xl p-5 overflow-hidden transition-all duration-300 border border-border">
                 <div className="flex items-center gap-6">
                   <div className="flex-1">
                     <div className="text-sm text-primary py-4">
@@ -131,7 +131,7 @@ export default function Dashboard() {
                             'noopener,noreferrer'
                           )
                         }
-                        className="flex items-center bg-white/70 hover:bg-white/55 dark:bg-white/10 dark:hover:bg-white/20 cursor-pointer text-black/70 dark:text-slate-100 px-4 py-2 rounded-xl text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        className="flex items-center bg-opposite/85 cursor-pointer text-foreground dark:text-slate-100 px-4 py-2 rounded-xl text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-blue-400"
                       >
                         <img
                           src="/linkedin.png"

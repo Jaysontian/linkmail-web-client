@@ -94,8 +94,8 @@ export function TutorialCarousel({ isOpen, onClose }: TutorialCarouselProps) {
     },
     {
       id: 2,
-      title: "Network Smarter, Not Harder",
-      description: "Linkmail lives inside LinkedIn. On any profile, it automatically finds verified emails, analyzes each profile, and drafts a personalized message in your tone — and it sends it out right away.",
+      title: "Update Your Linkedin Now",
+      description: "Linkmail supercharges LinkedIn. On any profile, it automatically finds verified emails, analyzes each profile, and drafts a personalized message in your tone — and it sends it out right away.",
       needButton: true,
       buttonText: "Download Extension",
       buttonAction: () => {
@@ -141,6 +141,15 @@ export function TutorialCarousel({ isOpen, onClose }: TutorialCarouselProps) {
     },
     {
       id: 6,
+      title: "Unlock Premium Mode",
+      description: "Refer 3 friends to unlock premium features. Share Linkmail with your network and get access to advanced AI capabilities, unlimited outreach, and priority support.",
+      needButton: false,
+      buttonText: "",
+      buttonAction: () => {},
+      image: '/demo-refer.webm'
+    },
+    {
+      id: 7,
       title: "Ready to Master Outreach?",
       description: "You're all set! Time to become a networking superhuman. You can always open this tutorial again from the sidebar menu by clicking your name.",
       needButton: true,
@@ -290,7 +299,7 @@ export function TutorialCarousel({ isOpen, onClose }: TutorialCarouselProps) {
                     ))}
                   </div>
                 </div>
-                <motion.button
+                {/* <motion.button
                   onClick={onClose}
                   className="p-1.5 rounded-md hover:bg-hover cursor-pointer"
                   aria-label="Close tutorial"
@@ -299,7 +308,7 @@ export function TutorialCarousel({ isOpen, onClose }: TutorialCarouselProps) {
                   transition={{ type: "spring", stiffness: 400, damping: 25 }}
                 >
                   <X className="h-4 w-4 text-secondary" />
-                </motion.button>
+                </motion.button> */}
               </div>
 
               {/* Text Content */}

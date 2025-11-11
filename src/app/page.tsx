@@ -7,38 +7,36 @@ import { useAuth } from '@/hooks/useAuth';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getOAuthUrl } from '@/lib/api';
 import AnimatedPathText from '@/components/fancy/text/text-along-path';
-import ScrambleIn, { ScrambleInHandle } from '@/components/fancy/text/scramble-in';
 import Float from '@/components/fancy/blocks/float';
 import { Linkedin, ListChecks, MailCheck } from "lucide-react";
 
-// Component for cycling through different texts with scramble animation
-function CyclingScrambleText({ texts, interval = 4000 }: { texts: string[], interval?: number }) {
+// Component for cycling through different texts with fade in/out animation
+function CyclingFadeText({ texts, interval = 4000 }: { texts: string[], interval?: number }) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const scrambleRef = useRef<ScrambleInHandle>(null);
+  const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
     const cycleInterval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % texts.length);
+      // Fade out
+      setIsVisible(false);
+      
+      // After fade out completes, change text and fade in
+      setTimeout(() => {
+        setCurrentIndex((prev) => (prev + 1) % texts.length);
+        setIsVisible(true);
+      }, 250); // Half of transition duration (500ms / 2)
     }, interval);
 
     return () => clearInterval(cycleInterval);
   }, [texts.length, interval]);
 
-  useEffect(() => {
-    // Start scramble animation when text changes
-    if (scrambleRef.current) {
-      scrambleRef.current.start();
-    }
-  }, [currentIndex]);
-
   return (
-    <ScrambleIn
-      ref={scrambleRef}
-      text={texts[currentIndex]}
-      scrambleSpeed={25}
-      scrambledLetterCount={5}
-      autoStart={false}
-    />
+    <span
+      className="inline-block transition-opacity duration-500 ease-in-out"
+      style={{ opacity: isVisible ? 1 : 0 }}
+    >
+      {texts[currentIndex]}
+    </span>
   );
 }
 
@@ -114,22 +112,22 @@ export default function Home() {
                 className="h-8 w-8 mr-3"
                 style={{ objectFit: "contain" }}
               />
-              <h1 className="text-xl font-semibold font-tiempos-medium text-primary">Linkmail</h1>
-              <div className="text-xs text-secondary ml-2 py-1 px-2 rounded-lg bg-accent-ultra-light">Beta</div>
+              <h1 className="text-lg sm:text-xl font-semibold font-tiempos-medium text-primary">Linkmail</h1>
+              <div className="text-xs text-primary ml-1 sm:ml-2 py-1 px-2 rounded-lg bg-accent-ultra-light">Beta</div>
             </div>
 
             <div className="flex items-center">
               {user ? (
                 <button
                   onClick={handleDashboardClick}
-                  className="bg-primary cursor-pointer text-background px-6 py-1.5 rounded-lg text-base transition-colors ml-3 font-medium"
+                  className="bg-primary cursor-pointer text-background px-4 sm:px-6 py-1.5 rounded-lg text-sm sm:text-base transition-colors ml-2 sm:ml-3 font-medium"
                 >
                   Dashboard
                 </button>
               ) : (
                 <button
                   onClick={handleTryForFree}
-                  className="bg-primary cursor-pointer text-background px-6 py-1.5 rounded-lg text-base transition-colors ml-3 font-medium"
+                  className="bg-primary cursor-pointer text-background px-4 sm:px-6 py-1.5 rounded-lg text-sm sm:text-base transition-colors ml-2 sm:ml-3 font-medium"
                 >
                   Try for Free
                 </button>
@@ -140,15 +138,15 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl min-h-[calc(100vh-10rem)] flex">
+      <main className="mx-auto max-w-7xl min-h-[calc(100vh-10rem)] flex flex-col lg:flex-row">
         {/* Left Panel - Callout */}
-        <div className="flex-1 flex flex-col justify-center px-8 py-12">
-          <div className="max-w-lg text-center">
-            <h1 className="text-5xl font-tiempos-medium font-bold text-primary mb-6 leading-tight">
-              Made for the <br></br> <CyclingScrambleText texts={networkerTexts} />.
+        <div className="flex-1 flex flex-col justify-center px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+          <div className="max-w-lg mx-auto lg:mx-0 text-center">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-tiempos-medium font-bold text-primary mb-4 lg:mb-6 leading-tight">
+              Made for the <br className="block" /> <CyclingFadeText texts={networkerTexts} />.
             </h1>
-            <p className="text-lg text-secondary mb-12 leading-relaxed">
-              The AI for people searching, email finding, <br></br>and outreach tracking
+            <p className="text-base sm:text-lg text-secondary mb-8 lg:mb-12 leading-relaxed">
+              The AI for people searching, email finding, <br className="hidden sm:block" />and outreach tracking
             </p>
             <div className="flex justify-center">
               {isLoading ? (
@@ -169,7 +167,7 @@ export default function Home() {
 
         {/* Right Panel - Blue Square */}
         <div 
-          className="w-1/2 bg-[#1E67B5] flex items-center justify-center rounded-xl relative overflow-hidden"
+          className="w-full lg:w-1/2 bg-[#1E67B5] flex items-center justify-center rounded-xl relative overflow-hidden min-h-[300px] lg:min-h-0 mt-8 lg:mt-0"
           ref={containerRef}
         >
           {/* Hands image */}
@@ -206,18 +204,18 @@ export default function Home() {
 
       {/* Second Section – Features */}
 
-      <div className="mx-auto max-w-7xl pt-24 min-h-[calc(100vh-10rem)] flex flex-col items-center justify-center pb-12">
+      <div className="mx-auto max-w-7xl pt-12 sm:pt-16 lg:pt-24 min-h-[calc(100vh-10rem)] flex flex-col items-center justify-center pb-8 sm:pb-12">
 
-        <div className="flex-1 flex flex-col justify-center px-8 py-6 text-center">
-          <h2 className="text-4xl font-bold text-primary mb-6 font-tiempos-medium">Networking, but 20x faster.</h2>
-          <p className="max-w-lg text-lg text-secondary mb-12 leading-relaxed">
+        <div className="flex-1 flex flex-col justify-center px-4 sm:px-8 py-4 sm:py-6 text-center">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-primary mb-4 sm:mb-6 font-tiempos-medium">Networking, but 20x faster.</h2>
+          <p className="max-w-lg text-base sm:text-lg text-secondary mb-8 sm:mb-12 leading-relaxed px-4">
             Linkmail helps you level up your networking and outreach – find more jobs, outreach more people, send more follow ups.
           </p>
         </div>
 
         <div className="flex flex-col w-full items-stretch justify-center">
           {/* Left: Video Demo */}
-          <div className="flex-1 flex flex-col justify-center items-center px-12 py-4">
+          <div className="flex-1 flex flex-col justify-center items-center px-4 sm:px-8 lg:px-12 py-4">
             <div className="w-full max-w-3xl rounded-xl overflow-hidden border border-border">
               <video
                 src="/demo_1.webm"
@@ -237,8 +235,8 @@ export default function Home() {
           {/* Import Lucide icons at the top of your file if not already imported:
               import { Linkedin, MailCheck, ListChecks } from "lucide-react";
           */}
-          <div className="flex-1 flex flex-col justify-center items-center py-4 mt-12">
-            <div className="flex w-full max-w-5xl gap-8">
+          <div className="flex-1 flex flex-col justify-center items-center py-4 mt-8 sm:mt-12">
+            <div className="flex flex-col sm:flex-row w-full max-w-5xl gap-6 sm:gap-8 px-4 sm:px-0">
               {[
                 {
                   title: "Your LinkedIn Companion",
@@ -259,12 +257,12 @@ export default function Home() {
                   icon: <ListChecks strokeWidth={1.5} className="w-8 h-8 mr-2 text-primary" />,
                 },
               ].map((feature, idx) => (
-                <div key={idx} className="w-1/3 my-8 last:mb-0">
-                  <div className=" mb-4">{feature.icon}</div>
-                  <h3 className="text-2xl font-semibold text-primary font-tiempos-regular mb-2 flex items-center gap-2">
+                <div key={idx} className="w-full sm:w-1/3 my-4 sm:my-8 last:mb-0">
+                  <div className="mb-4">{feature.icon}</div>
+                  <h3 className="text-xl sm:text-2xl font-semibold text-primary font-tiempos-regular mb-2 flex items-center gap-2">
                     {feature.title}
                   </h3>
-                  <p className="text-md text-tertiary mt-6">{feature.content}</p>
+                  <p className="text-sm sm:text-md text-tertiary mt-4 sm:mt-6">{feature.content}</p>
                 </div>
               ))}
             </div>
@@ -277,19 +275,21 @@ export default function Home() {
 
     </div>
 
-    <footer className="w-full bg-black text-white px-12 py-10 mt-12">
-      <div className="mx-auto max-w-7xl flex flex-col md:flex-row items-center justify-between gap-4 px-4">
+    <footer className="w-full bg-black text-white px-4 sm:px-8 lg:px-12 py-8 sm:py-10 mt-8 sm:mt-12">
+      <div className="mx-auto max-w-7xl flex flex-col md:flex-row items-center justify-between gap-4">
         {/* Left: Logo and name */}
-        <div className="flex items-center gap-4">
-          <img src="/logo.png" alt="LinkMail Logo" className="w-6 h-6" />
-          <span className="font-semibold text-base">Linkmail</span>
-          <p className="text-center text-xs flex-1 text-white/45">
+        <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
+            <img src="/logo.png" alt="LinkMail Logo" className="w-6 h-6" />
+            <span className="font-semibold text-sm sm:text-base">Linkmail</span>
+          </div>
+          <p className="text-center text-xs text-white/45">
             &copy; {new Date().getFullYear()} Linkmail AI
           </p>
         </div>
 
         {/* Right: Links */}
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4 sm:gap-6">
           {/* <a href="/about" className="text-xs hover:underline transition-colors">About Us</a> */}
           <a href="/privacy" className="text-xs hover:underline transition-colors">Privacy Policy</a>
           <a href="mailto:jaysontian@g.ucla.edu" className="text-xs hover:underline transition-colors">Contact Us</a>

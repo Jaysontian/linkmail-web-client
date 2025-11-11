@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, CreditCard, Zap, Copy, Check, Users } from 'lucide-react';
+import { User, CreditCard, Zap, Copy, Check, Users, Mail } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
 import Image from 'next/image';
 import { apiClient } from '@/lib/api';
@@ -292,86 +292,73 @@ export default function SettingsPage() {
                     <div className="space-y-6">
                       <div>
                         <h2 className="text-2xl font-newsreader-500 text-primary mb-2">
-                          Subscription
+                          Usage & Subscription
                         </h2>
-                        <p className="text-secondary text-sm mb-6">
-                          Manage your subscription and billing information.
-                        </p>
                       </div>
 
-                      {/* Email Finder Usage Card */}
-                      <div className="bg-foreground border border-border rounded-xl p-6 shadow-sm">
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2.5 bg-accent/10 rounded-lg">
-                              <Zap className="w-5 h-5 text-accent" />
-                            </div>
-                            <div>
-                              <h3 className="text-lg font-medium text-primary">
-                                Email Finder
-                              </h3>
-                              <p className="text-sm text-tertiary mt-0.5">
-                                Find verified email addresses
-                              </p>
-                            </div>
-                          </div>
+                      {/* Email Finder Usage Section */}
+                      <div>
+                        <div className="flex items-center gap-4">
+                          
+                          <p className="block text-md text-secondary mb-1 font-medium">
+                            Email Finder Usage
+                          </p>
                         </div>
+                        
+                        <p className="mt-2 text-sm text-tertiary mb-4">
+                          Find verified email addresses for LinkedIn profiles. Each successful email lookup counts as one credit.
+                        </p>
 
                         {loadingEmailFinder ? (
                           <div className="flex items-center justify-center py-8">
                             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-accent"></div>
                           </div>
                         ) : emailFinderUsage ? (
-                          <div className="space-y-4">
+                          <div className="space-y-4 bg-foreground p-4 rounded-2xl border border-border">
                             {/* Usage Stats */}
-                            <div className="flex items-end justify-between">
+                            {/* <div className="grid grid-cols-2 gap-4">
                               <div>
-                                <p className="text-sm text-secondary mb-1">Current Usage</p>
+                                <p className="text-sm text-secondary mb-2">Current Usage</p>
                                 <div className="flex items-baseline gap-2">
-                                  <span className="text-3xl font-newsreader-500 text-primary">
+                                  <span className="text-2xl font-newsreader-500 text-primary">
                                     {emailFinderUsage.current}
                                   </span>
-                                  <span className="text-lg text-tertiary">
+                                  <span className="text-base text-tertiary">
                                     / {emailFinderUsage.limit}
                                   </span>
                                 </div>
                               </div>
-                              <div className="text-right">
-                                <p className="text-sm text-secondary mb-1">Remaining</p>
-                                <div className="flex items-center gap-1.5">
-                                  <span className="text-2xl font-newsreader-500 text-primary">
-                                    {emailFinderUsage.remaining}
-                                  </span>
-                                </div>
+                              <div>
+                                <p className="text-sm text-secondary mb-2">Remaining</p>
+                                <span className="text-2xl font-newsreader-500 text-primary">
+                                  {emailFinderUsage.remaining}
+                                </span>
                               </div>
-                            </div>
+                            </div> */}
 
                             {/* Progress Bar */}
-                            <div className="space-y-2">
-                              <div className="w-full h-2.5 bg-background rounded-full overflow-hidden">
+                            <div className="space-y-1.5">
+                              <div className="w-full h-2 bg-background rounded-full overflow-hidden">
                                 <div
                                   className="h-full rounded-full transition-all duration-500 bg-accent"
                                   style={{ width: `${Math.min((emailFinderUsage.current / emailFinderUsage.limit) * 100, 100)}%` }}
                                 />
                               </div>
-                              <div className="flex items-center justify-between text-xs">
-                                <span className="text-tertiary">
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs text-secondary">
                                   {((emailFinderUsage.current / emailFinderUsage.limit) * 100).toFixed(0)}% used
+                                </span>
+                                <span className="text-xs text-secondary">
+                                  {emailFinderUsage.limit - emailFinderUsage.current} left
                                 </span>
                               </div>
                             </div>
 
                             {/* Info Message */}
-                            {emailFinderUsage.hasReachedLimit ? (
+                            {emailFinderUsage.hasReachedLimit && (
                               <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
                                 <p className="text-sm text-red-600 dark:text-red-400">
                                   You&apos;ve reached your email finder limit. Upgrade to get more lookups.
-                                </p>
-                              </div>
-                            ) : (
-                              <div className="mt-4 p-3 bg-accent/5 border border-accent/10 rounded-lg">
-                                <p className="text-sm text-secondary">
-                                  Email finder credits are used when finding email addresses for LinkedIn profiles. Each successful email lookup counts as one credit.
                                 </p>
                               </div>
                             )}
@@ -383,101 +370,73 @@ export default function SettingsPage() {
                         )}
                       </div>
 
-                      {/* Referral Program Card */}
-                      <div className="bg-foreground border border-border rounded-xl p-6 shadow-sm">
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2.5 bg-accent/10 rounded-lg">
-                              <Users className="w-5 h-5 text-accent" />
-                            </div>
-                            <div>
-                              <h3 className="text-lg font-medium text-primary">
-                                Referral Program
-                              </h3>
-                              <p className="text-sm text-tertiary mt-0.5">
-                                Refer 3 friends to unlock Premium Plus
-                              </p>
-                            </div>
+                      {/* Referral Program Section */}
+                      <div>
+                        <p className="block text-md text-secondary mb-1 font-medium mt-4">
+                          Refer a Friend
+                        </p>
+                        <p className="mt-2 text-sm text-tertiary mb-4">
+                          Refer 3 friends during our beta to unlock Premium. When 3 people sign up with Google using your link, you&apos;ll automatically be upgraded to Premium Plus (100 email lookups)!
+                        </p>
+
+                        {/* Referral Link */}
+                        {referralData && 
+                        <div className="mb-4">
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              value={referralData.referralLink}
+                              readOnly
+                              className="flex-1 px-3 py-2 text-sm bg-foreground text-tertiary border border-border rounded-xl font-mono user-select-none"
+                            />
+                            <button
+                              onClick={copyReferralLink}
+                              className="cursor-pointer px-4 py-1.5 bg-accent hover:bg-accent-light text-white rounded-xl transition-all duration-200 flex items-center gap-2 text-sm"
+                            >
+                              {copiedLink ? (
+                                <>
+                                  <Check className="w-4 h-4" />
+                                  Copied
+                                </>
+                              ) : (
+                                <>
+                                  <Copy className="w-4 h-4" />
+                                  Copy Link
+                                </>
+                              )}
+                            </button>
                           </div>
-                        </div>
+                        </div>}
 
                         {loadingReferral ? (
                           <div className="flex items-center justify-center py-8">
                             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-accent"></div>
                           </div>
                         ) : referralData ? (
-                          <div className="space-y-4">
-                            {/* Referral Stats */}
-                            <div className="flex items-center justify-between p-4 bg-background rounded-lg">
-                              <div>
-                                <p className="text-sm text-secondary mb-1">Successful Referrals</p>
-                                <div className="flex items-baseline gap-2">
-                                  <span className="text-2xl font-newsreader-500 text-primary">
-                                    {referralData.stats.completed}
-                                  </span>
-                                  <span className="text-lg text-tertiary">/ 3</span>
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                <p className="text-sm text-secondary mb-1">Remaining</p>
-                                <span className="text-2xl font-newsreader-500 text-primary">
-                                  {referralData.stats.remaining}
-                                </span>
-                              </div>
-                            </div>
-
+                          <div className="space-y-4 bg-foreground p-4 rounded-2xl border border-border">
                             {/* Progress Bar */}
-                            <div className="space-y-2">
-                              <div className="w-full h-2.5 bg-background rounded-full overflow-hidden">
+                            <div className="space-y-1.5">
+                              <div className="w-full h-2 bg-background rounded-full overflow-hidden">
                                 <div
                                   className="h-full rounded-full transition-all duration-500 bg-accent"
                                   style={{ width: `${Math.min((referralData.stats.completed / 3) * 100, 100)}%` }}
                                 />
                               </div>
-                            </div>
-
-                            {/* Referral Link */}
-                            <div>
-                              <label className="block text-sm font-medium text-secondary mb-2">
-                                Your Referral Link
-                              </label>
-                              <div className="flex gap-2">
-                                <input
-                                  type="text"
-                                  value={referralData.referralLink}
-                                  readOnly
-                                  className="flex-1 px-4 py-3 bg-background text-secondary border border-border rounded-lg text-sm font-mono"
-                                />
-                                <button
-                                  onClick={copyReferralLink}
-                                  className="px-4 py-3 bg-accent hover:bg-accent-light text-white rounded-lg transition-all duration-200 flex items-center gap-2"
-                                >
-                                  {copiedLink ? (
-                                    <>
-                                      <Check className="w-4 h-4" />
-                                      Copied
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Copy className="w-4 h-4" />
-                                      Copy
-                                    </>
-                                  )}
-                                </button>
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs text-secondary">
+                                  {referralData.stats.completed} of 3 referrals
+                                </span>
+                                <span className="text-xs text-secondary">
+                                  {referralData.stats.remaining} to go
+                                </span>
                               </div>
                             </div>
 
                             {/* Status Message */}
-                            {referralData.hasUnlockedPremiumPlus ? (
+                            {referralData.hasUnlockedPremiumPlus && (
                               <div className="mt-4 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
                                 <p className="text-sm text-green-600 dark:text-green-400">
                                   🎉 Congratulations! You&apos;ve unlocked Premium Plus with {referralData.stats.completed} referrals!
-                                </p>
-                              </div>
-                            ) : (
-                              <div className="mt-4 p-3 bg-accent/5 border border-accent/10 rounded-lg">
-                                <p className="text-sm text-secondary">
-                                  Share your referral link with friends. When 3 people sign up with Google using your link, you&apos;ll automatically be upgraded to Premium Plus (50 email lookups)!
                                 </p>
                               </div>
                             )}
@@ -490,7 +449,7 @@ export default function SettingsPage() {
                       </div>
 
                       {/* Subscription Management Placeholder */}
-                      <div className="text-center py-12">
+                      {/* <div className="text-center py-12">
                         <div className="mx-auto w-24 h-24 bg-foreground rounded-full flex items-center justify-center mb-4">
                           <CreditCard className="w-12 h-12 text-secondary" />
                         </div>
@@ -500,7 +459,7 @@ export default function SettingsPage() {
                         <p className="text-tertiary max-w-md mx-auto">
                           Subscription features will be available soon. Check back later to manage your plan and billing.
                         </p>
-                      </div>
+                      </div> */}
                     </div>
                   )}
                 </motion.div>
