@@ -2,13 +2,15 @@
 
 import React, { useRef, useEffect, useState, Suspense } from "react";
 import { ProtectedRoute } from '@/components/ProtectedRoute';
-import { LoginButton } from '@/components/LoginButton';
+import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { getOAuthUrl } from '@/lib/api';
 import AnimatedPathText from '@/components/fancy/text/text-along-path';
 import Float from '@/components/fancy/blocks/float';
 import { Linkedin, ListChecks, MailCheck } from "lucide-react";
+
+const CHROME_WEB_STORE_URL = 'https://chromewebstore.google.com/detail/linkmail/gehgnliedpckenmdindaioghgkhnfjaa';
 
 // Component for cycling through different texts with fade in/out animation
 function CyclingFadeText({ texts, interval = 4000 }: { texts: string[], interval?: number }) {
@@ -64,16 +66,8 @@ export default function Home() {
     router.push('/dashboard');
   };
 
-  const handleTryForFree = () => {
-    // Get referral code from localStorage if present
-    const ref = localStorage.getItem('linkmail_referral_code');
-    
-    // Redirect to backend OAuth flow with referral code
-    let oauthUrl = getOAuthUrl();
-    if (ref) {
-      oauthUrl += `&ref=${ref}`;
-    }
-    window.location.href = oauthUrl;
+  const handleDownload = () => {
+    window.open(CHROME_WEB_STORE_URL, '_blank');
   };
 
   const networkerTexts = [
@@ -102,41 +96,7 @@ export default function Home() {
       </Suspense>
       
     <div className="min-h-screen bg-background px-4 sm:px-6 lg:px-8 py-2">
-      <header>
-        <div className="mx-auto max-w-7xl">
-          <div className="flex justify-between items-center h-auto py-8">
-            <div className="flex items-center">
-              <img
-                src="/logo.png"
-                alt="Linkmail Logo"
-                className="h-8 w-8 mr-3"
-                style={{ objectFit: "contain" }}
-              />
-              <h1 className="text-lg sm:text-xl font-semibold font-tiempos-medium text-primary">Linkmail</h1>
-              <div className="text-xs text-primary ml-1 sm:ml-2 py-1 px-2 rounded-lg bg-accent-ultra-light">Beta</div>
-            </div>
-
-            <div className="flex items-center">
-              {user ? (
-                <button
-                  onClick={handleDashboardClick}
-                  className="bg-primary cursor-pointer text-background px-4 sm:px-6 py-1.5 rounded-lg text-sm sm:text-base transition-colors ml-2 sm:ml-3 font-medium"
-                >
-                  Dashboard
-                </button>
-              ) : (
-                <button
-                  onClick={handleTryForFree}
-                  className="bg-primary cursor-pointer text-background px-4 sm:px-6 py-1.5 rounded-lg text-sm sm:text-base transition-colors ml-2 sm:ml-3 font-medium"
-                >
-                  Try for Free
-                </button>
-              )}
-
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header onTryForFree={handleDownload} />
 
       <main className="mx-auto max-w-7xl min-h-[calc(100vh-10rem)] flex flex-col lg:flex-row">
         {/* Left Panel - Callout */}
@@ -159,7 +119,18 @@ export default function Home() {
                   Dashboard
                 </button>
               ) : (
-                <LoginButton expanded={true} />
+                <button
+                  onClick={handleDownload}
+                  className="flex items-center justify-center px-6 py-2 bg-primary text-background font-medium rounded-lg hover:opacity-90 cursor-pointer transition-colors shadow-md"
+                >
+                  <img
+                    src="/chrome.png"
+                    alt="Chrome"
+                    className="inline-block w-4 h-4 mr-2 align-middle"
+                    style={{ verticalAlign: "middle" }}
+                  />
+                  Download Now
+                </button>
               )}
             </div>
           </div>
@@ -275,27 +246,7 @@ export default function Home() {
 
     </div>
 
-    <footer className="w-full bg-black text-white px-4 sm:px-8 lg:px-12 py-8 sm:py-10 mt-8 sm:mt-12">
-      <div className="mx-auto max-w-7xl flex flex-col md:flex-row items-center justify-between gap-4">
-        {/* Left: Logo and name */}
-        <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
-          <div className="flex items-center gap-2 sm:gap-4">
-            <img src="/logo.png" alt="LinkMail Logo" className="w-6 h-6" />
-            <span className="font-semibold text-sm sm:text-base">Linkmail</span>
-          </div>
-          <p className="text-center text-xs text-white/45">
-            &copy; {new Date().getFullYear()} Linkmail AI
-          </p>
-        </div>
-
-        {/* Right: Links */}
-        <div className="flex items-center gap-4 sm:gap-6">
-          {/* <a href="/about" className="text-xs hover:underline transition-colors">About Us</a> */}
-          <a href="/privacy" className="text-xs hover:underline transition-colors">Privacy Policy</a>
-          <a href="mailto:jaysontian@g.ucla.edu" className="text-xs hover:underline transition-colors">Contact Us</a>
-        </div>
-      </div>
-    </footer>
+    <Footer />
             
     </div>
   );

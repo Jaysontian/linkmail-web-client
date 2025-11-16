@@ -33,8 +33,8 @@ export default function Dashboard() {
         setShowSuccess(false);
       }, 3000);
     } else if (!isLoading && !isAuthenticated) {
-      // No token and not authenticated, redirect to home
-      router.push('/');
+      // No token and not authenticated, redirect to signin
+      router.push('/signin');
     }
   }, [isLoading, isAuthenticated, router]);
 

@@ -40,7 +40,7 @@ export default function TemplatesPage() {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.push('/');
+      router.push('/signin');
     }
   }, [isLoading, isAuthenticated, router]);
 
