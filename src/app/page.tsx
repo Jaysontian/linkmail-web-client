@@ -71,9 +71,9 @@ export default function Home() {
   };
 
   const networkerTexts = [
-    "cracked networkers",
-    "internship searchers", 
-    "LinkedIn warriors",
+    "networking",
+    "outreach", 
+    "people investing",
     "people investors",
   ];
 
@@ -103,7 +103,7 @@ export default function Home() {
         <div className="flex-1 flex flex-col justify-center px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
           <div className="max-w-lg mx-auto lg:mx-0 text-center">
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-tiempos-medium font-bold text-primary mb-4 lg:mb-6 leading-tight">
-              Made for the <br className="block" /> <CyclingFadeText texts={networkerTexts} />.
+              Made for <br className="block" /> <CyclingFadeText texts={networkerTexts} />.
             </h1>
             <p className="text-base sm:text-lg text-secondary mb-8 lg:mb-12 leading-relaxed">
               The AI for people searching, email finding, <br className="hidden sm:block" />and outreach tracking

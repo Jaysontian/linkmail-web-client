@@ -94,33 +94,6 @@ export function TutorialCarousel({ isOpen, onClose }: TutorialCarouselProps) {
     },
     {
       id: 2,
-      title: "Update Your Linkedin Now",
-      description: "Linkmail supercharges LinkedIn. On any profile, it automatically finds verified emails, analyzes each profile, and drafts a personalized message in your tone — and it sends it out right away.",
-      needButton: true,
-      buttonText: "Download Extension",
-      buttonAction: () => {
-        handleDownloadClick();
-        window.open('https://chromewebstore.google.com/detail/linkmail/gehgnliedpckenmdindaioghgkhnfjaa', '_blank');
-      },
-      icon: '/chrome.png',
-      image: '/tutorial_try.png',
-      doneButton: true
-    },
-    {
-      id: 3,
-      title: "Send Your First Linkmail",
-      description: "Now it's your turn! Send a real outreach email to Ishaan in under 10 seconds. Just click below to try the full AI workflow on a real LinkedIn profile.",
-      needButton: true,
-      buttonText: "Send Ishaan a Message",
-      buttonAction: () => {
-        window.open('https://www.linkedin.com/in/ishaangpta/', '_blank');
-      },
-      icon: '/linkedin.png',
-      image: '/demo_small.webm',
-      doneButton: true
-    },
-    {
-      id: 4,
       title: "Teach Linkmail Your Voice",
       description: "Customize your profile with your professional background and make custom templates. The AI learns how you communicate — so every outreach feels authentic, not robotic.",
       needButton: false,
@@ -131,7 +104,7 @@ export function TutorialCarousel({ isOpen, onClose }: TutorialCarouselProps) {
       image: '/template-demo.webm'
     },
     {
-      id: 5,
+      id: 3,
       title: "Your Relationship OS",
       description: "Every contact, email, and note is saved to your Linkmail dashboard. Track follow-ups, manage conversations, and let your AI remind you when to reconnect or send thoughtful updates.",
       needButton: false,
@@ -140,7 +113,7 @@ export function TutorialCarousel({ isOpen, onClose }: TutorialCarouselProps) {
       image: '/tutorial_network.png'
     },
     {
-      id: 6,
+      id: 4,
       title: "Unlock Premium Mode",
       description: "Refer 3 friends to unlock premium features. Share Linkmail with your network and get access to advanced AI capabilities, unlimited outreach, and priority support.",
       needButton: false,
@@ -149,7 +122,7 @@ export function TutorialCarousel({ isOpen, onClose }: TutorialCarouselProps) {
       image: '/demo-refer.webm'
     },
     {
-      id: 7,
+      id: 5,
       title: "Ready to Master Outreach?",
       description: "You're all set! Time to become a networking superhuman. You can always open this tutorial again from the sidebar menu by clicking your name.",
       needButton: true,
