@@ -29,7 +29,7 @@ export default function StudentsPage() {
                 no one else has.
               </h1>
               <p className="text-base sm:text-lg text-secondary mb-8 lg:mb-12 leading-relaxed">
-                (do it in 10 seconds per recruiter)
+                (send personalized outreach in 10 seconds)
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-start items-start">
