@@ -26,32 +26,23 @@ export default function StudentsPage() {
               {/* Section 1 */}
               <div>
                 <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-primary leading-tight">
-                  <span className="font-bold">The Harsh Truth:</span>
+                  <span className="font-bold">Networking Isn&apos;t Optional.</span>
                 </h2>
                 <p className="text-sm sm:text-base lg:text-lg text-secondary mt-1 leading-relaxed">
-                  You won&apos;t hear back from mass online applications.
+                  Hundreds of online applications won&apos;t get you noticed.
                 </p>
               </div>
 
               {/* Section 2 */}
               <div>
                 <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-primary leading-tight">
-                  Referrals are <span className="font-bold">4× more likely</span> to get a response.
+                  Referrals Get Results.
                 </h2>
                 <p className="text-sm sm:text-base lg:text-lg text-secondary mt-1 leading-relaxed">
-                  Recruiters trust introductions — not random applications in a stack of thousands.
+                  Recruiters trust introductions — they&apos;re <span className="font-bold">4× more likely</span> to get a response.
                 </p>
               </div>
 
-              {/* Section 3 */}
-              <div>
-                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-primary leading-tight">
-                  Networking isn&apos;t optional anymore.
-                </h2>
-                <p className="text-sm sm:text-base lg:text-lg text-secondary mt-1 leading-relaxed">
-                  It&apos;s the difference between silence and opportunity.
-                </p>
-              </div>
 
               {/* Section 4 */}
               <div>
@@ -59,7 +50,7 @@ export default function StudentsPage() {
                   Email Works. LinkedIn DMs Don&apos;t.
                 </h2>
                 <p className="text-sm sm:text-base lg:text-lg text-secondary mt-1 leading-relaxed">
-                  Professionals are busy. They check emails — not LinkedIn DMs.
+                  Professionals are busy. They check emails — not DMs.
                 </p>
               </div>
 
@@ -69,8 +60,7 @@ export default function StudentsPage() {
                   Use LinkMail.
                 </h2>
                 <p className="text-sm sm:text-base lg:text-lg text-secondary mt-1 leading-relaxed max-w-xl">
-                  Automate and Personalize your outreach.  
-                  Get in front of the right people — fast.
+                  Personalized outreach. Done in seconds.
                 </p>
               </div>
 
@@ -86,7 +76,7 @@ export default function StudentsPage() {
             </div>
 
             {/* RIGHT SIDE VIDEO */}
-            <div className="hidden lg:flex flex-1 w-full lg:w-1/2 items-center justify-center lg:justify-end">
+            <div className="flex flex-1 w-full lg:w-1/2 items-center justify-center lg:justify-end">
               <div className="w-full max-w-md lg:max-w-none rounded-xl overflow-hidden border border-border shadow-lg">
                 <video
                   src="/demo_1.webm"
