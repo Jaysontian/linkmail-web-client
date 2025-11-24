@@ -18,10 +18,10 @@ export default function StudentsPage() {
 
       <main className="w-full min-h-[calc(100vh-8rem)] lg:h-[calc(100vh-5rem)] flex items-start lg:items-center justify-center py-4 lg:pt-0 lg:pb-6">
         <div className="w-full max-w-7xl mx-auto">
-          <div className="flex flex-col lg:flex-row gap-8 lg:gap-10 items-center lg:items-center">
+          <div className="flex flex-col lg:flex-row gap-6 lg:gap-10 items-center lg:items-center">
 
             {/* LEFT CONTENT */}
-            <div className="flex-1 w-full lg:w-1/2 text-left tracking-tighter space-y-6 lg:space-y-12">
+            <div className="flex-1 w-full lg:w-1/2 text-left tracking-tighter space-y-4 lg:space-y-12">
 
               {/* Section 1 */}
               <div>
@@ -55,7 +55,7 @@ export default function StudentsPage() {
               </div>
 
               {/* Section 5 (CTA Intro) */}
-              <div className="pt-2 lg:pt-2">
+              <div className="pt-0 lg:pt-2">
                 <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-primary leading-tight">
                   Use LinkMail.
                 </h2>
@@ -65,7 +65,7 @@ export default function StudentsPage() {
               </div>
 
               {/* CTA Button */}
-              <div className="flex flex-col sm:flex-row gap-2 items-start pt-2 lg:pt-2">
+              <div className="flex flex-col sm:flex-row gap-2 items-start pt-0 lg:pt-2">
                 <button
                   onClick={handleDownload}
                   className="bg-accent cursor-pointer text-white px-6 py-2.5 rounded-lg text-base transition-colors font-medium w-full sm:w-auto"
@@ -76,8 +76,8 @@ export default function StudentsPage() {
             </div>
 
             {/* RIGHT SIDE VIDEO */}
-            <div className="flex flex-1 w-full lg:w-1/2 items-center justify-center lg:justify-end">
-              <div className="w-full max-w-md lg:max-w-none rounded-xl overflow-hidden border border-border shadow-lg">
+            <div className="flex flex-1 w-full lg:w-1/2 items-center justify-center lg:justify-end mt-4 lg:mt-0">
+              <div className="w-full max-w-sm lg:max-w-none rounded-xl overflow-hidden border border-border shadow-lg">
                 <video
                   src="/demo_1.webm"
                   autoPlay
