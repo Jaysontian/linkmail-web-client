@@ -4,7 +4,8 @@ import React from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 
-const CHROME_WEB_STORE_URL = 'https://chromewebstore.google.com/detail/linkmail/gehgnliedpckenmdindaioghgkhnfjaa';
+const CHROME_WEB_STORE_URL =
+  'https://chromewebstore.google.com/detail/linkmail/gehgnliedpckenmdindaioghgkhnfjaa';
 
 export default function StudentsPage() {
   const handleDownload = () => {
@@ -15,48 +16,91 @@ export default function StudentsPage() {
     <div className="min-h-screen bg-background px-4 sm:px-6 lg:px-8 py-2">
       <Header onTryForFree={handleDownload} />
 
-      <main className="w-full min-h-[calc(100vh-10rem)] flex items-center justify-center py-8 lg:py-12">
-        <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-8 lg:gap-12 items-center lg:items-start">
-            {/* Left: Text Content */}
-            <div className="flex-1 text-left tracking-tighter">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-tiempos-medium font-bold text-primary mb-4 leading-tight">
-                Recruiting is a game.
-              </h1>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-tiempos-medium font-bold text-primary mb-4 lg:mb-6 leading-tight">
-                We gave you the controller that
-                <br />
-                no one else has.
-              </h1>
-              <p className="text-base sm:text-lg text-secondary mb-8 lg:mb-12 leading-relaxed">
-                (send personalized outreach in 10 seconds)
-              </p>
+      <main className="w-full h-[calc(100vh-5rem)] flex items-center justify-center pt-0 pb-4 lg:pt-0 lg:pb-6">
+        <div className="w-full max-w-7xl mx-auto">
+          <div className="flex flex-col lg:flex-row gap-6 lg:gap-10 items-center lg:items-center">
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-start items-start">
+            {/* LEFT CONTENT */}
+            <div className="flex-1 w-full lg:w-1/2 text-left tracking-tighter space-y-12">
+
+              {/* Section 1 */}
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-bold text-primary leading-tight">
+                  <span className="font-bold">The Harsh Truth:</span>
+                </h2>
+                <p className="text-base sm:text-lg text-secondary mt-1 leading-relaxed">
+                  You won't hear back from the hundreds of online applications you've sent out.
+                </p>
+              </div>
+
+              {/* Section 2 */}
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-bold text-primary leading-tight">
+                  Referrals are <span className="font-bold">4× more likely</span> to get a response.
+                </h2>
+                <p className="text-base sm:text-lg text-secondary mt-1 leading-relaxed">
+                  Recruiters trust introductions — not random applications in a stack of thousands.
+                </p>
+              </div>
+
+              {/* Section 3 */}
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-bold text-primary leading-tight">
+                  Networking isn't optional anymore.
+                </h2>
+                <p className="text-base sm:text-lg text-secondary mt-1 leading-relaxed">
+                  It's the difference between silence and opportunity.
+                </p>
+              </div>
+
+              {/* Section 4 */}
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-bold text-primary leading-tight">
+                  Email Works. LinkedIn DMs Don't.
+                </h2>
+                <p className="text-base sm:text-lg text-secondary mt-1 leading-relaxed">
+                  Professionals are busy. They check emails — not LinkedIn DMs.
+                </p>
+              </div>
+
+              {/* Section 5 (CTA Intro) */}
+              <div className="pt-2">
+                <h2 className="text-2xl sm:text-3xl font-bold text-primary leading-tight">
+                  Use LinkMail.
+                </h2>
+                <p className="text-base sm:text-lg text-secondary mt-1 leading-relaxed max-w-xl">
+                  Automate and Personalize your outreach.  
+                  Get in front of the right people — fast.
+                </p>
+              </div>
+
+              {/* CTA Button */}
+              <div className="flex flex-col sm:flex-row gap-2 items-start pt-2">
                 <button
                   onClick={handleDownload}
-                  className="bg-accent cursor-pointer text-white px-6 py-2 rounded-lg text-base transition-colors font-medium w-full sm:w-auto"
+                  className="bg-accent cursor-pointer text-white px-6 py-2.5 rounded-lg text-base transition-colors font-medium w-full sm:w-auto"
                 >
                   Join For Free
                 </button>
               </div>
             </div>
 
-            {/* Right: Video */}
-            <div className="flex flex-1 w-full lg:w-full items-end justify-end">
-              <div className="w-full lg:w-1/2 rounded-xl overflow-hidden border border-border">
+            {/* RIGHT SIDE VIDEO */}
+            <div className="flex-1 w-full lg:w-1/2 flex items-center justify-center lg:justify-end">
+              <div className="w-full max-w-md lg:max-w-none rounded-xl overflow-hidden border border-border shadow-lg">
                 <video
                   src="/demo_1.webm"
                   autoPlay
                   loop
                   muted
                   playsInline
-                  className="w-full h-auto object-contain"
+                  className="w-full h-auto object-cover"
                 >
                   Your browser does not support the video tag.
                 </video>
               </div>
             </div>
+
           </div>
         </div>
       </main>
@@ -65,4 +109,3 @@ export default function StudentsPage() {
     </div>
   );
 }
-
