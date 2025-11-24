@@ -29,7 +29,7 @@ export default function StudentsPage() {
                   <span className="font-bold">The Harsh Truth:</span>
                 </h2>
                 <p className="text-base sm:text-lg text-secondary mt-1 leading-relaxed">
-                  You won't hear back from the hundreds of online applications you've sent out.
+                  You won&apos;t hear back from the hundreds of online applications you&apos;ve sent out.
                 </p>
               </div>
 
@@ -46,17 +46,17 @@ export default function StudentsPage() {
               {/* Section 3 */}
               <div>
                 <h2 className="text-2xl sm:text-3xl font-bold text-primary leading-tight">
-                  Networking isn't optional anymore.
+                  Networking isn&apos;t optional anymore.
                 </h2>
                 <p className="text-base sm:text-lg text-secondary mt-1 leading-relaxed">
-                  It's the difference between silence and opportunity.
+                  It&apos;s the difference between silence and opportunity.
                 </p>
               </div>
 
               {/* Section 4 */}
               <div>
                 <h2 className="text-2xl sm:text-3xl font-bold text-primary leading-tight">
-                  Email Works. LinkedIn DMs Don't.
+                  Email Works. LinkedIn DMs Don&apos;t.
                 </h2>
                 <p className="text-base sm:text-lg text-secondary mt-1 leading-relaxed">
                   Professionals are busy. They check emails — not LinkedIn DMs.
