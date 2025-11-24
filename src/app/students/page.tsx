@@ -31,8 +31,43 @@ const testimonials = [
 ];
 
 export default function StudentsPage() {
+  const [isPaused, setIsPaused] = useState(false);
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+
   const handleDownload = () => {
     window.open(CHROME_WEB_STORE_URL, '_blank');
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!scrollRef.current) return;
+    setIsDragging(true);
+    setIsPaused(true);
+    setStartX(e.pageX - scrollRef.current.offsetLeft);
+    setScrollLeft(scrollRef.current.scrollLeft);
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    setTimeout(() => setIsPaused(false), 1000); // Resume after 1 second
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !scrollRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = (x - startX) * 2; // Scroll speed multiplier
+    scrollRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  const handleTouchStart = () => {
+    setIsPaused(true);
+  };
+
+  const handleTouchEnd = () => {
+    setTimeout(() => setIsPaused(false), 1000); // Resume after 1 second
   };
 
   return (
@@ -144,41 +179,56 @@ export default function StudentsPage() {
             <div className="absolute left-0 top-0 bottom-0 w-20 lg:w-32 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none"></div>
             <div className="absolute right-0 top-0 bottom-0 w-20 lg:w-32 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none"></div>
             
-            {/* Continuous Scrolling Container */}
-            <div className="flex gap-6 animate-scroll-seamless py-2">
-              {/* Show 6 cards twice for seamless infinite loop */}
-              {[...testimonials, testimonials[0], testimonials[1], ...testimonials, testimonials[0], testimonials[1]].map((testimonial, index) => (
-                <div
-                  key={index}
-                  className="flex-shrink-0 w-[280px] sm:w-[380px] lg:w-[480px] bg-background border-2 border-border hover:border-primary rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300 group"
-                >
-                  {/* Quote icon */}
-                  <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
-                    </svg>
-                  </div>
-                  
-                  <p className="text-sm sm:text-base lg:text-lg text-primary leading-relaxed mb-6">
-                    {testimonial.quote}
-                  </p>
-                  
-                  <div className="flex items-center gap-3 pt-4 border-t border-border">
-                    {/* Avatar placeholder */}
-                    <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center text-white font-bold text-lg">
-                      {testimonial.author.charAt(0)}
+            {/* Scrollable Container */}
+            <div 
+              ref={scrollRef}
+              className={`overflow-x-auto scrollbar-hide ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+              onMouseDown={handleMouseDown}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+              onMouseMove={handleMouseMove}
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+              style={{ scrollSnapType: 'x proximity' }}
+            >
+              {/* Continuous Scrolling Container */}
+              <div className={`flex gap-6 py-2 ${isPaused ? '' : 'animate-scroll-seamless'}`}>
+                {/* Show 6 cards twice for seamless infinite loop */}
+                {[...testimonials, testimonials[0], testimonials[1], ...testimonials, testimonials[0], testimonials[1]].map((testimonial, index) => (
+                  <div
+                    key={index}
+                    className="flex-shrink-0 w-[280px] sm:w-[380px] lg:w-[480px] bg-background border-2 border-border hover:border-primary rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300 group select-none"
+                    style={{ scrollSnapAlign: 'start' }}
+                    onDragStart={(e) => e.preventDefault()}
+                  >
+                    {/* Quote icon */}
+                    <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
+                      </svg>
                     </div>
-                    <div>
-                      <p className="text-sm sm:text-base font-semibold text-primary">
-                        {testimonial.author}
-                      </p>
-                      <p className="text-xs sm:text-sm text-secondary">
-                        {testimonial.role}
-                      </p>
+                    
+                    <p className="text-sm sm:text-base lg:text-lg text-primary leading-relaxed mb-6">
+                      {testimonial.quote}
+                    </p>
+                    
+                    <div className="flex items-center gap-3 pt-4 border-t border-border">
+                      {/* Avatar placeholder */}
+                      <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center text-white font-bold text-lg">
+                        {testimonial.author.charAt(0)}
+                      </div>
+                      <div>
+                        <p className="text-sm sm:text-base font-semibold text-primary">
+                          {testimonial.author}
+                        </p>
+                        <p className="text-xs sm:text-sm text-secondary">
+                          {testimonial.role}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -204,8 +254,19 @@ export default function StudentsPage() {
             }
           }
           
-          .animate-scroll-seamless:hover {
-            animation-play-state: paused;
+          /* Hide scrollbar but keep functionality */
+          .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
+          
+          .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+          }
+          
+          /* Smooth scrolling */
+          .scrollbar-hide {
+            scroll-behavior: smooth;
           }
         `}</style>
       </section>
