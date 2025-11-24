@@ -42,12 +42,12 @@ export default function StudentsPage() {
       </div>
 
       {/* Hero Section */}
-      <main className="w-full min-h-[calc(100vh-8rem)] lg:h-[calc(100vh-5rem)] flex items-start lg:items-center justify-center py-4 lg:pt-0 lg:pb-6 px-4 sm:px-6 lg:px-8">
+      <main className="w-full min-h-fit lg:h-[calc(100vh-5rem)] flex items-start lg:items-center justify-center py-4 lg:pt-0 lg:pb-6 px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-7xl mx-auto">
-          <div className="flex flex-col lg:flex-row gap-6 lg:gap-10 items-center lg:items-center">
+          <div className="flex flex-col lg:flex-row gap-8 lg:gap-10 items-center lg:items-center">
 
             {/* LEFT CONTENT */}
-            <div className="flex-1 w-full lg:w-1/2 text-left tracking-tighter space-y-4 lg:space-y-12">
+            <div className="flex-1 w-full lg:w-1/2 text-left tracking-tighter space-y-3 lg:space-y-12">
 
               {/* Section 1 */}
               <div>
@@ -102,8 +102,8 @@ export default function StudentsPage() {
             </div>
 
             {/* RIGHT SIDE VIDEO */}
-            <div className="flex flex-1 w-full lg:w-1/2 items-center justify-center lg:justify-end mt-4 lg:mt-0">
-              <div className="w-full max-w-sm lg:max-w-none rounded-xl overflow-hidden border border-border shadow-lg">
+            <div className="flex flex-1 w-full lg:w-1/2 items-center justify-center lg:justify-end mt-6 lg:mt-0">
+              <div className="w-full max-w-md lg:max-w-none rounded-xl overflow-hidden border border-border shadow-lg">
                 <video
                   src="/demo_1.webm"
                   autoPlay
@@ -195,7 +195,13 @@ export default function StudentsPage() {
           }
           
           .animate-scroll-seamless {
-            animation: scrollSeamless 20s linear infinite;
+            animation: scrollSeamless 15s linear infinite;
+          }
+          
+          @media (min-width: 1024px) {
+            .animate-scroll-seamless {
+              animation: scrollSeamless 25s linear infinite;
+            }
           }
           
           .animate-scroll-seamless:hover {
