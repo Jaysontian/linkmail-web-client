@@ -1,17 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MessageSquare, User, Building, Search, Ellipsis, Edit, Trash2, Archive, Flag, MoreHorizontal } from 'lucide-react';
+import { MessageSquare, User, Building, Search, Mail, Check, Clock, ArrowRight, ExternalLink } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { apiClient } from '@/lib/api';
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  ContextMenuTrigger,
-} from '@/components/ui/context-menu';
 
 interface Message {
   id: string;
@@ -29,7 +22,7 @@ interface Connection {
   user_id: string;
   contact_id: number;
   subject: string;
-  status: 'active' | 'closed' | 'follow_up_needed' | 'responded' | 'meeting_scheduled' | 'converted';
+  status: 'active' | 'closed' | 'follow_up_needed' | 'follow_up_sent' | 'responded' | 'meeting_scheduled' | 'converted';
   notes: string | null;
   messages: Message[];
   created_at: string;
@@ -43,32 +36,14 @@ interface Connection {
   profile_picture_url: string | null;
 }
 
-const statusColors = {
-  active: 'bg-blue-100 text-blue-800',
-  closed: 'bg-gray-100 text-gray-800',
-  follow_up_needed: 'bg-yellow-100 text-yellow-800',
-  responded: 'bg-green-100 text-green-800',
-  meeting_scheduled: 'bg-purple-100 text-purple-800',
-  converted: 'bg-emerald-100 text-emerald-800',
-};
-
-const statusLabels = {
-  active: 'Active',
-  closed: 'Closed',
-  follow_up_needed: 'Follow Up Needed',
-  responded: 'Responded',
-  meeting_scheduled: 'Meeting Scheduled',
-  converted: 'Converted',
-};
-
-export default function ConnectionsPage() {
+export default function FollowUpsPage() {
   const { user, isLoading, isAuthenticated } = useAuth();
   const router = useRouter();
   const [connections, setConnections] = useState<Connection[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [updatingStatus, setUpdatingStatus] = useState<number | null>(null);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -107,24 +82,54 @@ export default function ConnectionsPage() {
     }
   };
 
+  const handleMarkAsFollowUp = async (contactId: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    try {
+      setUpdatingStatus(contactId);
+      const response = await apiClient.updateConnectionStatus(contactId, 'follow_up_sent');
+      
+      if (response.success) {
+        // Update local state
+        setConnections(prev => 
+          prev.map(conn => 
+            conn.contact_id === contactId 
+              ? { ...conn, status: 'follow_up_sent', updated_at: new Date().toISOString() } 
+              : conn
+          )
+        );
+      }
+    } catch (err) {
+      console.error('Failed to update status:', err);
+    } finally {
+      setUpdatingStatus(null);
+    }
+  };
+
   const handleConnectionClick = (connectionId: number) => {
     router.push(`/dashboard/connections/${connectionId}`);
   };
 
-  const handleMenuAction = (action: string, connectionId: number) => {
-    console.log(`${action} connection:`, connectionId);
-  };
-
+  // Filter connections based on search
   const filteredConnections = connections.filter(conn => {
     const matchesSearch = searchQuery === '' || 
       `${conn.first_name} ${conn.last_name}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
       conn.company?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       conn.primary_email?.toLowerCase().includes(searchQuery.toLowerCase());
     
-    const matchesStatus = statusFilter === 'all' || conn.status === statusFilter;
-    
-    return matchesSearch && matchesStatus;
+    return matchesSearch;
   });
+
+  // Separate and sort connections
+  // Initial emails: status is 'active' (not follow_up_sent), sorted oldest to newest
+  // Follow up sent: status is 'follow_up_sent', sorted oldest to newest
+  const initialEmailConnections = filteredConnections
+    .filter(conn => conn.status !== 'follow_up_sent')
+    .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+
+  const followUpConnections = filteredConnections
+    .filter(conn => conn.status === 'follow_up_sent')
+    .sort((a, b) => new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime());
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -134,6 +139,16 @@ export default function ConnectionsPage() {
     });
   };
 
+  const getInitialEmailDate = (conn: Connection) => {
+    // Get the first message date, or fall back to created_at
+    if (conn.messages && conn.messages.length > 0) {
+      const sortedMessages = [...conn.messages].sort(
+        (a, b) => new Date(a.sent_at).getTime() - new Date(b.sent_at).getTime()
+      );
+      return sortedMessages[0].sent_at;
+    }
+    return conn.created_at;
+  };
 
   if (isLoading || loading) {
     return (
@@ -144,7 +159,7 @@ export default function ConnectionsPage() {
   }
 
   if (!isAuthenticated) {
-    return null; // Will redirect in useEffect
+    return null;
   }
 
   if (error) {
@@ -163,203 +178,193 @@ export default function ConnectionsPage() {
     );
   }
 
+  const ConnectionCard = ({ connection, isFollowUp }: { connection: Connection; isFollowUp: boolean }) => {
+    const emailDate = isFollowUp ? connection.updated_at : getInitialEmailDate(connection);
+    
+    return (
+      <div
+        onClick={() => handleConnectionClick(connection.contact_id)}
+        className="bg-foreground border border-border rounded-xl p-4 hover:shadow-md transition-all duration-200 cursor-pointer group"
+      >
+        <div className="flex items-start gap-4">
+          {/* Profile Image */}
+          <div className="w-12 h-12 bg-background rounded-full flex items-center justify-center overflow-hidden border border-border flex-shrink-0">
+            {connection.profile_picture_url ? (
+              <img 
+                src={connection.profile_picture_url} 
+                alt={`${connection.first_name} ${connection.last_name}`}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            ) : (
+              <User className="h-6 w-6 text-tertiary" />
+            )}
+          </div>
+
+          {/* Info */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <h3 className="text-base font-semibold text-primary truncate">
+                  {connection.first_name} {connection.last_name}
+                </h3>
+                <p className="text-sm text-secondary truncate">
+                  {connection.job_title && connection.company 
+                    ? `${connection.job_title} @ ${connection.company}`
+                    : connection.company || connection.job_title || connection.primary_email
+                  }
+                </p>
+              </div>
+              
+              {/* LinkedIn Link */}
+              {connection.linkedin_url && (
+                <a
+                  href={connection.linkedin_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="text-secondary hover:text-primary transition-colors flex-shrink-0"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                </a>
+              )}
+            </div>
+
+            {/* Status Row */}
+            <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
+              <div className="flex items-center gap-2">
+                {isFollowUp ? (
+                  <>
+                    <div className="flex items-center gap-1.5 text-emerald-600">
+                      <Check className="h-4 w-4" />
+                      <span className="text-xs font-medium">Follow Up Sent</span>
+                    </div>
+                    <span className="text-xs text-tertiary">on {formatDate(emailDate)}</span>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-1.5 text-blue-600">
+                      <Mail className="h-4 w-4" />
+                      <span className="text-xs font-medium">Initial Email Sent</span>
+                    </div>
+                    <span className="text-xs text-tertiary">on {formatDate(emailDate)}</span>
+                  </>
+                )}
+              </div>
+
+              {/* Mark as Follow Up Button - only show for initial emails */}
+              {!isFollowUp && (
+                <button
+                  onClick={(e) => handleMarkAsFollowUp(connection.contact_id, e)}
+                  disabled={updatingStatus === connection.contact_id}
+                  className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-secondary hover:text-primary hover:bg-hover rounded-md transition-all disabled:opacity-50"
+                >
+                  {updatingStatus === connection.contact_id ? (
+                    <div className="animate-spin rounded-full h-3 w-3 border-b border-current"></div>
+                  ) : (
+                    <>
+                      <ArrowRight className="h-3 w-3" />
+                      <span>Mark Follow Up Sent</span>
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="max-w-4xl mx-auto p-6 pt-[100px]">
+    <div className="max-w-3xl mx-auto p-6 pt-[100px]">
       {/* Header */}
-      <div className="flex-1 py-">
+      <div className="flex-1 pb-6">
         <h1 className="text-3xl font-tiempos-medium text-primary">
-          This is your network.
+          Follow Ups
         </h1>
-        <p className="mt-4 text-[15px] max-w-lg text-stone-500 pb-8">
-          Your professional network database. Auto-populated from your sent emails with smart follow-up suggestions.
+        <p className="mt-2 text-[15px] text-stone-500">
+          Track your outreach and know when to follow up with your connections.
         </p>
       </div>
 
-      {/* Filters */}
-      <div className="flex gap-4 mb-6">
-        <div className="relative flex-1 max-w-md">
+      {/* Search */}
+      <div className="mb-6">
+        <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-secondary" />
           <input
             type="text"
-            placeholder="Search connections..."
+            placeholder="Search contacts..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border text-secondary border-border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 border text-secondary border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-foreground"
           />
         </div>
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-4 py-2 border text-secondary border-border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        >
-          <option value="all">All Statuses</option>
-          {Object.entries(statusLabels).map(([value, label]) => (
-            <option key={value} value={value}>{label}</option>
-          ))}
-        </select>
       </div>
 
-      {/* Connections Gallery */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 3xl:grid-cols-4 gap-6">
-        {filteredConnections.length === 0 ? (
-          <div className="col-span-full text-center py-12">
-            <MessageSquare className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-primary">No connections found</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              {searchQuery || statusFilter !== 'all' 
-                ? 'Try adjusting your search or filter criteria.'
-                : 'Start by sending your first email to create a connection.'
-              }
-            </p>
+      {/* Empty State */}
+      {filteredConnections.length === 0 && (
+        <div className="text-center py-12">
+          <MessageSquare className="mx-auto h-12 w-12 text-gray-400" />
+          <h3 className="mt-2 text-sm font-medium text-primary">No follow ups yet</h3>
+          <p className="mt-1 text-sm text-gray-500">
+            {searchQuery 
+              ? 'Try adjusting your search.'
+              : 'Start by sending your first email to create a follow up.'
+            }
+          </p>
+        </div>
+      )}
+
+      {/* Initial Emails Section */}
+      {initialEmailConnections.length > 0 && (
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <Clock className="h-4 w-4 text-blue-600" />
+            <h2 className="text-sm font-semibold text-primary uppercase tracking-wide">
+              Awaiting Follow Up
+            </h2>
+            <span className="text-xs text-tertiary bg-hover px-2 py-0.5 rounded-full">
+              {initialEmailConnections.length}
+            </span>
           </div>
-        ) : (
-          filteredConnections.map((connection) => (
-            <div
-              key={`${connection.user_id}_${connection.contact_id}`}
-              onClick={() => handleConnectionClick(connection.contact_id)}
-              className="bg-foreground border border-border rounded-2xl p-4 hover:shadow-lg transition-all duration-200 cursor-pointer group flex flex-col justify-between"
-            >
-               
+          <div className="space-y-3">
+            {initialEmailConnections.map((connection) => (
+              <ConnectionCard 
+                key={`${connection.user_id}_${connection.contact_id}`} 
+                connection={connection} 
+                isFollowUp={false}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
-              <div className="flex flex-col items-start">
-                {/* Profile Image */}
-                <div className="w-28 h-28 bg-foreground rounded-xl mb-4 flex items-center justify-start overflow-hidden border border-border">
-                  {connection.profile_picture_url ? (
-                    <img 
-                      src={connection.profile_picture_url} 
-                      alt={`${connection.first_name} ${connection.last_name}`}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        // Fallback to User icon if image fails to load
-                        e.currentTarget.style.display = 'none';
-                        const parent = e.currentTarget.parentElement;
-                        if (parent && !parent.querySelector('.fallback-icon')) {
-                          const icon = document.createElement('div');
-                          icon.className = 'fallback-icon w-full h-full flex items-center justify-center';
-                          icon.innerHTML = '<svg class="h-8 w-8 text-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>';
-                          parent.appendChild(icon);
-                        }
-                      }}
-                    />
-                  ) : (
-                    <User className="h-8 w-8 text-tertiary" />
-                  )}
-                </div>
-
-                {/* Name and Status */}
-                <div className="text-start">
-                  <h3 className="text-lg font-semibold text-primary transition-colors">
-                    {connection.first_name} {connection.last_name}
-                  </h3>
-                </div>
-
-                {/* Company and Role */}
-                <div className="space-y-1 text-start">
-                  {(() => {
-                    const titleRaw = connection.job_title || '';
-                    const titleClean = titleRaw.trim();
-                    const isAmbiguous = titleClean.length === 0 || titleClean.toLowerCase() === 'other' || titleClean.toLowerCase() === 'unknown' || titleClean.toLowerCase() === 'n/a' || titleClean.toLowerCase() === 'na';
-                    const companyClean = (connection.company || '').trim();
-                    const text = !isAmbiguous && titleClean && companyClean
-                      ? `${titleClean} @ ${companyClean}`
-                      : companyClean || titleClean;
-                    return (
-                      <p className="text-[10pt] text-secondary">{text}</p>
-                    );
-                  })()}
-                </div>
-              </div>
-
-
-              {/* top toolbar */}
-              <div className="flex items-center justify-between mt-4">
-                <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${statusColors[connection.status]}`}>
-                  {statusLabels[connection.status]}
-                </span>
-
-               <ContextMenu>
-                 <ContextMenuTrigger asChild>
-                   <div
-                     className="p-1 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
-                     onClick={(e) => {
-                       e.stopPropagation();
-                       // Trigger context menu programmatically on left click
-                       const event = new MouseEvent('contextmenu', {
-                         bubbles: true,
-                         cancelable: true,
-                         clientX: e.clientX,
-                         clientY: e.clientY,
-                       });
-                       e.currentTarget.dispatchEvent(event);
-                     }}
-                     aria-label="More options"
-                   >
-                     <Ellipsis className="h-5 w-5 text-gray-400" />
-                   </div>
-                 </ContextMenuTrigger>
-                 <ContextMenuContent className="w-48 z-50">
-                   <ContextMenuItem 
-                     onClick={(e) => {
-                       e.stopPropagation();
-                       handleConnectionClick(connection.contact_id);
-                     }}
-                     className="cursor-pointer"
-                   >
-                     <Edit className="mr-2 h-4 w-4" />
-                     View Details
-                   </ContextMenuItem>
-                   <ContextMenuItem 
-                     onClick={(e) => {
-                       e.stopPropagation();
-                       handleMenuAction('Edit', connection.contact_id);
-                     }}
-                     className="cursor-pointer"
-                   >
-                     <Edit className="mr-2 h-4 w-4" />
-                     Edit Connection
-                   </ContextMenuItem>
-                   <ContextMenuSeparator />
-                   <ContextMenuItem 
-                     onClick={(e) => {
-                       e.stopPropagation();
-                       handleMenuAction('Archive', connection.contact_id);
-                     }}
-                     className="cursor-pointer"
-                   >
-                     <Archive className="mr-2 h-4 w-4" />
-                     Archive
-                   </ContextMenuItem>
-                   <ContextMenuItem 
-                     onClick={(e) => {
-                       e.stopPropagation();
-                       handleMenuAction('Flag', connection.contact_id);
-                     }}
-                     className="cursor-pointer"
-                   >
-                     <Flag className="mr-2 h-4 w-4" />
-                     Flag for Follow-up
-                   </ContextMenuItem>
-                   <ContextMenuSeparator />
-                   <ContextMenuItem 
-                     onClick={(e) => {
-                       e.stopPropagation();
-                       handleMenuAction('Delete', connection.contact_id);
-                     }}
-                     className="cursor-pointer text-red-600 focus:text-red-600"
-                   >
-                     <Trash2 className="mr-2 h-4 w-4" />
-                     Delete
-                   </ContextMenuItem>
-                 </ContextMenuContent>
-               </ContextMenu>
-                
-              </div>
-
-
-            </div>
-          ))
-        )}
-      </div>
+      {/* Follow Ups Sent Section */}
+      {followUpConnections.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2 mb-4">
+            <Check className="h-4 w-4 text-emerald-600" />
+            <h2 className="text-sm font-semibold text-primary uppercase tracking-wide">
+              Follow Up Sent
+            </h2>
+            <span className="text-xs text-tertiary bg-hover px-2 py-0.5 rounded-full">
+              {followUpConnections.length}
+            </span>
+          </div>
+          <div className="space-y-3">
+            {followUpConnections.map((connection) => (
+              <ConnectionCard 
+                key={`${connection.user_id}_${connection.contact_id}`} 
+                connection={connection} 
+                isFollowUp={true}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

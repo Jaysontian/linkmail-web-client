@@ -20,7 +20,7 @@ export function Sidebar({ expanded, onToggle }: SidebarProps) {
   const navigation = [
     { name: 'Overview', href: '/dashboard', icon: Home },
     { name: 'Profile', href: '/dashboard/profile', icon: SquareUserRound },
-    { name: 'Connections', href: '/dashboard/connections', icon: CircleDotDashed },
+    { name: 'Follow Ups', href: '/dashboard/connections', icon: CircleDotDashed },
     { name: 'Templates', href: '/dashboard/templates', icon: FileText },
   ];
 
