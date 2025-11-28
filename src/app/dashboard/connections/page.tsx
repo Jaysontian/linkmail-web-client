@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MessageSquare, User, Building, Search, Mail, Check, Clock, ArrowRight, ExternalLink } from 'lucide-react';
+import { MessageSquare, User, Building, Search, Mail, Check, Clock, ArrowRight, ArrowLeft, ExternalLink } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { apiClient } from '@/lib/api';
@@ -106,6 +106,30 @@ export default function FollowUpsPage() {
     }
   };
 
+  const handleMoveBackToInitial = async (contactId: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    try {
+      setUpdatingStatus(contactId);
+      const response = await apiClient.updateConnectionStatus(contactId, 'active');
+      
+      if (response.success) {
+        // Update local state
+        setConnections(prev => 
+          prev.map(conn => 
+            conn.contact_id === contactId 
+              ? { ...conn, status: 'active', updated_at: new Date().toISOString() } 
+              : conn
+          )
+        );
+      }
+    } catch (err) {
+      console.error('Failed to update status:', err);
+    } finally {
+      setUpdatingStatus(null);
+    }
+  };
+
   const handleConnectionClick = (connectionId: number) => {
     router.push(`/dashboard/connections/${connectionId}`);
   };
@@ -180,6 +204,10 @@ export default function FollowUpsPage() {
 
   const ConnectionCard = ({ connection, isFollowUp }: { connection: Connection; isFollowUp: boolean }) => {
     const emailDate = isFollowUp ? connection.updated_at : getInitialEmailDate(connection);
+    const [imageError, setImageError] = useState(false);
+    
+    // Generate initials for fallback
+    const initials = `${connection.first_name?.[0] || ''}${connection.last_name?.[0] || ''}`.toUpperCase();
     
     return (
       <div
@@ -188,18 +216,19 @@ export default function FollowUpsPage() {
       >
         <div className="flex items-start gap-4">
           {/* Profile Image */}
-          <div className="w-12 h-12 bg-background rounded-full flex items-center justify-center overflow-hidden border border-border flex-shrink-0">
-            {connection.profile_picture_url ? (
+          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center overflow-hidden border border-border flex-shrink-0">
+            {connection.profile_picture_url && !imageError ? (
               <img 
                 src={connection.profile_picture_url} 
                 alt={`${connection.first_name} ${connection.last_name}`}
                 className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                }}
+                onError={() => setImageError(true)}
+                referrerPolicy="no-referrer"
               />
+            ) : initials ? (
+              <span className="text-white font-semibold text-sm">{initials}</span>
             ) : (
-              <User className="h-6 w-6 text-tertiary" />
+              <User className="h-6 w-6 text-white" />
             )}
           </div>
 
@@ -254,8 +283,23 @@ export default function FollowUpsPage() {
                 )}
               </div>
 
-              {/* Mark as Follow Up Button - only show for initial emails */}
-              {!isFollowUp && (
+              {/* Action buttons */}
+              {isFollowUp ? (
+                <button
+                  onClick={(e) => handleMoveBackToInitial(connection.contact_id, e)}
+                  disabled={updatingStatus === connection.contact_id}
+                  className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-secondary hover:text-primary hover:bg-hover rounded-md transition-all disabled:opacity-50"
+                >
+                  {updatingStatus === connection.contact_id ? (
+                    <div className="animate-spin rounded-full h-3 w-3 border-b border-current"></div>
+                  ) : (
+                    <>
+                      <ArrowLeft className="h-3 w-3" />
+                      <span>Move Back</span>
+                    </>
+                  )}
+                </button>
+              ) : (
                 <button
                   onClick={(e) => handleMarkAsFollowUp(connection.contact_id, e)}
                   disabled={updatingStatus === connection.contact_id}

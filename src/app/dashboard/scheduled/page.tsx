@@ -12,11 +12,7 @@ import {
   Edit3, 
   X, 
   Save, 
-  Mail, 
-  CheckCircle2, 
-  XCircle, 
-  AlertCircle,
-  RefreshCw 
+  AlertCircle
 } from 'lucide-react';
 import { ScheduledEmail } from '@/lib/api';
 
@@ -58,47 +54,12 @@ function formatScheduledDate(dateString: string): string {
   return relative ? `${dateFormat} at ${timeString} (${relative})` : `${dateFormat} at ${timeString}`;
 }
 
-function getStatusBadge(status: ScheduledEmail['status']) {
-  switch (status) {
-    case 'pending':
-      return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-          <Clock className="w-3 h-3" />
-          Pending
-        </span>
-      );
-    case 'sent':
-      return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
-          <CheckCircle2 className="w-3 h-3" />
-          Sent
-        </span>
-      );
-    case 'failed':
-      return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
-          <XCircle className="w-3 h-3" />
-          Failed
-        </span>
-      );
-    case 'cancelled':
-      return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">
-          <X className="w-3 h-3" />
-          Cancelled
-        </span>
-      );
-  }
-}
-
 export default function ScheduledEmailsPage() {
   const { isLoading: authLoading, isAuthenticated } = useAuth();
   const { 
-    scheduledEmails, 
     pendingEmails, 
     isLoading, 
     error, 
-    refetch, 
     cancelEmail, 
     editEmail 
   } = useScheduledEmails();
@@ -112,7 +73,6 @@ export default function ScheduledEmailsPage() {
   });
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState<'pending' | 'all'>('pending');
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -182,90 +142,14 @@ export default function ScheduledEmailsPage() {
     return null;
   }
 
-  const displayEmails = activeTab === 'pending' ? pendingEmails : scheduledEmails;
-
   return (
     <div className="max-w-3xl mx-auto py-6 px-6 mt-[100px]">
       {/* Header */}
       <div className="mb-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-tiempos-medium text-primary">Scheduled Emails</h1>
-            <p className="mt-2 text-[15px] text-tertiary">
-              View and manage your upcoming scheduled emails
-            </p>
-          </div>
-          <button
-            onClick={() => refetch()}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-border text-secondary text-sm hover:bg-hover cursor-pointer transition-colors"
-          >
-            <RefreshCw className="w-4 h-4" />
-            Refresh
-          </button>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-3 gap-4 mt-6">
-          <div className="bg-foreground border border-border rounded-2xl p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-amber-100 dark:bg-amber-900/30">
-                <Clock className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-              </div>
-              <div>
-                <p className="text-2xl font-semibold text-primary">{pendingEmails.length}</p>
-                <p className="text-xs text-tertiary">Pending</p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-foreground border border-border rounded-2xl p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-green-100 dark:bg-green-900/30">
-                <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
-              </div>
-              <div>
-                <p className="text-2xl font-semibold text-primary">
-                  {scheduledEmails.filter(e => e.status === 'sent').length}
-                </p>
-                <p className="text-xs text-tertiary">Sent</p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-foreground border border-border rounded-2xl p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-blue-100 dark:bg-blue-900/30">
-                <Mail className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <p className="text-2xl font-semibold text-primary">{scheduledEmails.length}</p>
-                <p className="text-xs text-tertiary">Total</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <div className="flex gap-2 mt-6">
-          <button
-            onClick={() => setActiveTab('pending')}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors cursor-pointer ${
-              activeTab === 'pending'
-                ? 'bg-primary text-background'
-                : 'bg-foreground border border-border text-secondary hover:bg-hover'
-            }`}
-          >
-            Pending ({pendingEmails.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('all')}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors cursor-pointer ${
-              activeTab === 'all'
-                ? 'bg-primary text-background'
-                : 'bg-foreground border border-border text-secondary hover:bg-hover'
-            }`}
-          >
-            All Emails ({scheduledEmails.length})
-          </button>
-        </div>
+        <h1 className="text-3xl font-tiempos-medium text-primary">Scheduled Emails</h1>
+        <p className="mt-2 text-[15px] text-tertiary">
+          View and manage your upcoming scheduled emails
+        </p>
       </div>
 
       {/* Error State */}
@@ -279,7 +163,7 @@ export default function ScheduledEmailsPage() {
       )}
 
       {/* Email List */}
-      {displayEmails.length === 0 ? (
+      {pendingEmails.length === 0 ? (
         <div className="bg-foreground border border-border rounded-3xl p-10 text-center">
           <img
             src="/empty.png"
@@ -287,19 +171,15 @@ export default function ScheduledEmailsPage() {
             className="mx-auto my-10 w-20 h-20 opacity-70"
             style={{ objectFit: "contain" }}
           />
-          <h3 className="text-lg font-medium text-primary mb-2">
-            {activeTab === 'pending' ? 'No pending emails' : 'No scheduled emails'}
-          </h3>
+          <h3 className="text-lg font-medium text-primary mb-2">No scheduled emails</h3>
           <p className="text-sm text-tertiary">
-            {activeTab === 'pending' 
-              ? "You don't have any emails scheduled to be sent." 
-              : "You haven't scheduled any emails yet."}
+            You don&apos;t have any emails scheduled to be sent.
           </p>
         </div>
       ) : (
         <div className="space-y-3">
           <AnimatePresence mode="popLayout">
-            {displayEmails.map((email) => (
+            {pendingEmails.map((email) => (
               <motion.div
                 key={email.id}
                 layout
@@ -311,9 +191,8 @@ export default function ScheduledEmailsPage() {
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
-                    {/* Status and Recipient */}
-                    <div className="flex items-center gap-3 mb-2">
-                      {getStatusBadge(email.status)}
+                    {/* Recipient */}
+                    <div className="flex items-center gap-2 mb-2">
                       <span className="text-sm text-secondary truncate">
                         To: {email.recipient_email}
                       </span>
@@ -326,35 +205,33 @@ export default function ScheduledEmailsPage() {
                     
                     {/* Scheduled Time */}
                     <div className="flex items-center gap-2 text-sm text-tertiary">
-                      <Calendar className="w-4 h-4" />
+                      <Clock className="w-4 h-4" />
                       <span>{formatScheduledDate(email.scheduled_at)}</span>
                     </div>
                   </div>
 
-                  {/* Actions - Only show for pending emails */}
-                  {email.status === 'pending' && (
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => openEditor(email)}
-                        className="p-2 rounded-lg text-secondary hover:text-primary hover:bg-hover cursor-pointer transition-colors"
-                        title="Edit email"
-                      >
-                        <Edit3 className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(email.id)}
-                        disabled={isDeleting === email.id}
-                        className="p-2 rounded-lg text-secondary hover:text-red-500 hover:bg-red-500/10 cursor-pointer transition-colors disabled:opacity-50"
-                        title="Cancel email"
-                      >
-                        {isDeleting === email.id ? (
-                          <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                          <Trash2 className="w-4 h-4" />
-                        )}
-                      </button>
-                    </div>
-                  )}
+                  {/* Actions */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => openEditor(email)}
+                      className="p-2 rounded-lg text-secondary hover:text-primary hover:bg-hover cursor-pointer transition-colors"
+                      title="Edit email"
+                    >
+                      <Edit3 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(email.id)}
+                      disabled={isDeleting === email.id}
+                      className="p-2 rounded-lg text-secondary hover:text-red-500 hover:bg-red-500/10 cursor-pointer transition-colors disabled:opacity-50"
+                      title="Cancel email"
+                    >
+                      {isDeleting === email.id ? (
+                        <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <Trash2 className="w-4 h-4" />
+                      )}
+                    </button>
+                  </div>
                 </div>
               </motion.div>
             ))}
