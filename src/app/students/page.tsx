@@ -1,8 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
+import { AnimatedShinyText } from '@/components/ui/animated-shiny-text';
+import { BorderBeam } from '@/components/ui/border-beam';
 
 const CHROME_WEB_STORE_URL =
   'https://chromewebstore.google.com/detail/linkmail/gehgnliedpckenmdindaioghgkhnfjaa';
@@ -31,127 +34,107 @@ const testimonials = [
 ];
 
 export default function StudentsPage() {
-  const [isPaused, setIsPaused] = useState(false);
-  const scrollRef = React.useRef<HTMLDivElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
-
   const handleDownload = () => {
     window.open(CHROME_WEB_STORE_URL, '_blank');
   };
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (!scrollRef.current) return;
-    setIsDragging(true);
-    setIsPaused(true);
-    setStartX(e.pageX - scrollRef.current.offsetLeft);
-    setScrollLeft(scrollRef.current.scrollLeft);
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-    setTimeout(() => setIsPaused(false), 1000); // Resume after 1 second
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !scrollRef.current) return;
-    e.preventDefault();
-    const x = e.pageX - scrollRef.current.offsetLeft;
-    const walk = (x - startX) * 2; // Scroll speed multiplier
-    scrollRef.current.scrollLeft = scrollLeft - walk;
-  };
-
-  const handleTouchStart = () => {
-    setIsPaused(true);
-  };
-
-  const handleTouchEnd = () => {
-    setTimeout(() => setIsPaused(false), 1000); // Resume after 1 second
-  };
+  useEffect(() => {
+    // Hide scrollbar but keep scrolling functionality
+    const style = document.createElement('style');
+    style.textContent = `
+      html, body {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+      html::-webkit-scrollbar, body::-webkit-scrollbar {
+        display: none;
+      }
+    `;
+    document.head.appendChild(style);
+    
+    // Cleanup on unmount
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
       <div className="px-4 sm:px-6 lg:px-8 py-2">
-        <Header onTryForFree={handleDownload} />
+        <Header onTryForFree={handleDownload} className="fixed top-0 left-0 right-0 z-50 px-4" />
       </div>
 
-      {/* Hero Section */}
-      <main className="w-full min-h-fit lg:h-[calc(100vh-5rem)] flex items-start lg:items-center justify-center py-4 lg:pt-0 lg:pb-6 px-4 sm:px-6 lg:px-8">
-        <div className="w-full max-w-7xl mx-auto">
-          <div className="flex flex-col lg:flex-row gap-8 lg:gap-10 items-center lg:items-center">
-
-            {/* LEFT CONTENT */}
-            <div className="flex-1 w-full lg:w-1/2 text-left tracking-tighter space-y-3 lg:space-y-12">
-
-              {/* Section 1 */}
-              <div>
-                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-primary leading-tight">
-                  <span className="font-bold">Networking Isn&apos;t Optional.</span>
-                </h2>
-                <p className="text-sm sm:text-base lg:text-lg text-secondary mt-1 leading-relaxed">
-                  Hundreds of online applications won&apos;t get you noticed.
-                </p>
-              </div>
-
-              {/* Section 2 */}
-              <div>
-                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-primary leading-tight">
-                  Referrals Get Results.
-                </h2>
-                <p className="text-sm sm:text-base lg:text-lg text-secondary mt-1 leading-relaxed">
-                  Recruiters trust introductions — they&apos;re <span className="font-bold">4× more likely</span> to get a response.
-                </p>
-              </div>
-
-
-              {/* Section 4 */}
-              <div>
-                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-primary leading-tight">
-                  Email Works. LinkedIn DMs Don&apos;t.
-                </h2>
-                <p className="text-sm sm:text-base lg:text-lg text-secondary mt-1 leading-relaxed">
-                  Professionals are busy. They check emails — not DMs.
-                </p>
-              </div>
-
-              {/* Section 5 (CTA Intro) */}
-              <div className="pt-0 lg:pt-2">
-                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-primary leading-tight">
-                  Use LinkMail.
-                </h2>
-                <p className="text-sm sm:text-base lg:text-lg text-secondary mt-1 leading-relaxed max-w-xl">
-                  Personalized outreach. Done in seconds.
-                </p>
-              </div>
-
-              {/* CTA Button */}
-              <div className="flex flex-col sm:flex-row gap-2 items-start pt-0 lg:pt-2">
-                <button
-                  onClick={handleDownload}
-                  className="bg-accent cursor-pointer text-white px-6 py-2.5 rounded-lg text-base transition-colors font-medium w-full sm:w-auto"
-                >
-                  Join For Free
-                </button>
-              </div>
-            </div>
-
-            {/* RIGHT SIDE VIDEO */}
-            <div className="flex flex-1 w-full lg:w-1/2 items-center justify-center lg:justify-end mt-6 lg:mt-0">
-              <div className="w-full max-w-md lg:max-w-none rounded-xl overflow-hidden border border-border shadow-lg">
-                <video
-                  src="/demo_1.webm"
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  className="w-full h-auto object-cover"
-                >
-                  Your browser does not support the video tag.
-                </video>
-              </div>
-            </div>
-
+      <main className="w-full min-h-[calc(100vh-5rem)] flex items-center justify-center py-4 lg:py-6 px-4 sm:px-6 lg:px-8 overflow-visible mt-16">
+        <div className="w-full max-w-4xl flex flex-col items-center justify-center text-center overflow-visible">
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+            className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-primary mb-6"
+          >
+            Warm Recruiting, <AnimatedShinyText >100x Faster</AnimatedShinyText>.
+          </motion.h1>
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
+            className="w-full max-w-2xl text-secondary text-[16px] mb-16"
+          >
+            Supercharge your LinkedIn with automatic email finding, profile analysis, and personalized outreach in your tone — then send it directly inside LinkedIn.
+          </motion.h2>
+          
+          {/* Video */}
+          <div className="relative w-full max-w-md lg:max-w-2xl p-8">
+            {/* Glow wrapper with gradient background */}
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1.2, delay: 0.8, ease: "easeOut" }}
+              className="absolute inset-8"
+            >
+              <div 
+                className="w-full h-full rounded-3xl opacity-70"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(34,211,238,0.55) 0%, rgba(56,189,248,0.52) 20%, rgba(59,130,246,0.55) 40%, rgba(96,165,250,0.45) 60%, rgba(59,78,179,0.50) 80%, rgba(34,211,238,0.42) 100%)',
+                  filter: 'blur(48px)',
+                }}
+              />
+            </motion.div>
+            
+            {/* Video wrapper with backdrop blur */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1.0, delay: 1.0, ease: "easeOut" }}
+              className="relative p-4 bg-white/10 backdrop-blur-sm rounded-4xl border border-white/10 shadow-2xl overflow-hidden"
+            >
+              <video
+                src="/demo_1.webm"
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-auto object-cover rounded-2xl shadow-md"
+              >
+                Your browser does not support the video tag.
+              </video>
+              <BorderBeam
+                duration={6}
+                size={400}
+                colorFrom="#3b82f6"
+                colorTo="#22d3ee"
+                className="from-transparent via-blue-500 to-transparent"
+              />
+              <BorderBeam
+                duration={6}
+                delay={3}
+                size={400}
+                borderWidth={2}
+                colorFrom="#22d3ee"
+                colorTo="#ec4899"
+                className="from-transparent via-cyan-500 to-transparent"
+              />
+            </motion.div>
           </div>
         </div>
       </main>
@@ -166,11 +149,11 @@ export default function StudentsPage() {
         
         <div className="w-full px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-12">
-            <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-primary mb-3">
-              What Students Are Saying
+            <h3 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-primary mb-3">
+              Success Stories
             </h3>
             <p className="text-base sm:text-lg text-secondary max-w-2xl mx-auto">
-              Real stories from students who landed their dream roles
+              Real stories from students who landed their dream job from a Linkmail.
             </p>
           </div>
           
@@ -180,48 +163,36 @@ export default function StudentsPage() {
             <div className="absolute right-0 top-0 bottom-0 w-20 lg:w-32 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none"></div>
             
             {/* Scrollable Container */}
-            <div 
-              ref={scrollRef}
-              className={`overflow-x-auto scrollbar-hide ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
-              onMouseDown={handleMouseDown}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-              onMouseMove={handleMouseMove}
-              onTouchStart={handleTouchStart}
-              onTouchEnd={handleTouchEnd}
-              style={{ scrollSnapType: 'x proximity' }}
-            >
+            <div className="overflow-hidden">
               {/* Continuous Scrolling Container */}
-              <div className={`flex gap-6 py-2 ${isPaused ? '' : 'animate-scroll-seamless'}`}>
+              <div className="flex gap-6 py-2 animate-scroll-seamless min-w-full lg:min-w-[1200px]">
                 {/* Show 6 cards twice for seamless infinite loop */}
                 {[...testimonials, testimonials[0], testimonials[1], ...testimonials, testimonials[0], testimonials[1]].map((testimonial, index) => (
                   <div
                     key={index}
-                    className="flex-shrink-0 w-[280px] sm:w-[380px] lg:w-[480px] bg-background border-2 border-border hover:border-primary rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300 group select-none"
-                    style={{ scrollSnapAlign: 'start' }}
-                    onDragStart={(e) => e.preventDefault()}
+                    className="flex-shrink-0 w-80 md:w-96 lg:w-[400px] max-w-[90vw] bg-background border border-border rounded-xl p-4 sm:p-5 shadow-md group select-none pointer-events-none"
                   >
                     {/* Quote icon */}
-                    <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                      <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center mb-3">
+                      <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
                       </svg>
                     </div>
                     
-                    <p className="text-sm sm:text-base lg:text-lg text-primary leading-relaxed mb-6">
+                    <p className="text-sm text-secondary leading-relaxed mb-4">
                       {testimonial.quote}
                     </p>
                     
-                    <div className="flex items-center gap-3 pt-4 border-t border-border">
+                    <div className="flex items-center gap-2 pt-3 border-t border-border">
                       {/* Avatar placeholder */}
-                      <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center text-white font-bold text-lg">
+                      <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center text-white font-semibold text-sm">
                         {testimonial.author.charAt(0)}
                       </div>
                       <div>
-                        <p className="text-sm sm:text-base font-semibold text-primary">
+                        <p className="text-sm font-semibold text-primary">
                           {testimonial.author}
                         </p>
-                        <p className="text-xs sm:text-sm text-secondary">
+                        <p className="text-xs text-secondary">
                           {testimonial.role}
                         </p>
                       </div>
@@ -245,28 +216,13 @@ export default function StudentsPage() {
           }
           
           .animate-scroll-seamless {
-            animation: scrollSeamless 15s linear infinite;
+            animation: scrollSeamless 5s linear infinite;
           }
           
           @media (min-width: 1024px) {
             .animate-scroll-seamless {
-              animation: scrollSeamless 25s linear infinite;
+              animation: scrollSeamless 5s linear infinite;
             }
-          }
-          
-          /* Hide scrollbar but keep functionality */
-          .scrollbar-hide {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-          }
-          
-          .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-          }
-          
-          /* Smooth scrolling */
-          .scrollbar-hide {
-            scroll-behavior: smooth;
           }
         `}</style>
       </section>
