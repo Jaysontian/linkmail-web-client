@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import "./globals.css";
-import { Providers } from "./providers";
 
 export const metadata: Metadata = {
   title: "Linkmail",
@@ -12,7 +10,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "AI Outreach for Hardcore Networkers",
-    url: "https://linkmail.dev",
+    url: "https://linkmail.dev/students",
     siteName: "Linkmail",
     images: [
       {
@@ -33,17 +31,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default function StudentsLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <body>
-        <Providers>{children}</Providers>
-      </body>
-    </html>
-  );
+  return <>{children}</>;
 }
 

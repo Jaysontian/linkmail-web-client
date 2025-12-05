@@ -1,253 +1,252 @@
 'use client';
 
-import React, { useRef, useEffect, useState, Suspense } from "react";
-import { ProtectedRoute } from '@/components/ProtectedRoute';
+import React, { useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
-import { useAuth } from '@/hooks/useAuth';
-import { useRouter, useSearchParams } from 'next/navigation';
-import AnimatedPathText from '@/components/fancy/text/text-along-path';
-import Float from '@/components/fancy/blocks/float';
-import { Linkedin, ListChecks, MailCheck } from "lucide-react";
+import { AnimatedShinyText } from '@/components/ui/animated-shiny-text';
+import { BorderBeam } from '@/components/ui/border-beam';
+import { ParticlesBackground } from '@/components/Particles';
+import { HandConstellation } from '@/components/HandConstellation';
 
-const CHROME_WEB_STORE_URL = 'https://chromewebstore.google.com/detail/linkmail/gehgnliedpckenmdindaioghgkhnfjaa';
+const CHROME_WEB_STORE_URL =
+  'https://chromewebstore.google.com/detail/linkmail/gehgnliedpckenmdindaioghgkhnfjaa';
 
-// Component for cycling through different texts with fade in/out animation
-function CyclingFadeText({ texts, interval = 4000 }: { texts: string[], interval?: number }) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isVisible, setIsVisible] = useState(true);
-
-  useEffect(() => {
-    const cycleInterval = setInterval(() => {
-      // Fade out
-      setIsVisible(false);
-      
-      // After fade out completes, change text and fade in
-      setTimeout(() => {
-        setCurrentIndex((prev) => (prev + 1) % texts.length);
-        setIsVisible(true);
-      }, 250); // Half of transition duration (500ms / 2)
-    }, interval);
-
-    return () => clearInterval(cycleInterval);
-  }, [texts.length, interval]);
-
-  return (
-    <span
-      className="inline-block transition-opacity duration-500 ease-in-out"
-      style={{ opacity: isVisible ? 1 : 0 }}
-    >
-      {texts[currentIndex]}
-    </span>
-  );
-}
-
-// Component to capture referral code from URL
-function ReferralCapture() {
-  const searchParams = useSearchParams();
-  
-  useEffect(() => {
-    const ref = searchParams.get('ref');
-    if (ref) {
-      localStorage.setItem('linkmail_referral_code', ref);
-      console.log('[HomePage] Stored referral code:', ref);
-    }
-  }, [searchParams]);
-
-  return null;
-}
+const testimonials = [
+  {
+    quote: "LinkMail helped me get a referral for my dream company — SpaceX. I landed an interview, passed it, and got the job. This tool literally changed my career.",
+    author: "Sarah M.",
+    role: "Aerospace Engineering Student"
+  },
+  {
+    quote: "I already knew networking was important, but it was so time-consuming to send personalized messages. LinkMail saved me countless hours while building my network.",
+    author: "James L.",
+    role: "Computer Science Student"
+  },
+  {
+    quote: "LinkMail's templates make it so easy to generate emails exactly how I want them. Customizing and personalizing each message takes seconds instead of minutes.",
+    author: "Emily R.",
+    role: "Cognitive Science Student"
+  },
+  {
+    quote: "Within a week of using LinkMail, I had responses from 3 different companies. The personalized outreach made all the difference.",
+    author: "Michael T.",
+    role: "Economics Student"
+  }
+];
 
 export default function Home() {
-  const { user, isLoading } = useAuth();
-  const router = useRouter();
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const handleDashboardClick = () => {
-    router.push('/dashboard');
-  };
-
   const handleDownload = () => {
     window.open(CHROME_WEB_STORE_URL, '_blank');
   };
 
-  const networkerTexts = [
-    "networking",
-    "outreach", 
-    "people investing",
-    "people investors",
-  ];
-
-  const paths = [
-    // Down, up all the way, then down, parabolic style:
-    "M 20,0 Q 30,100 50,80 Q 70,60 95,90",
-    "M 5,100 Q 30,30 50,50 Q 70,70 95,20",
-  ];
-
-  const texts = [
-    `NETWORKING • CONNECTIONS • GROWTH • SUCCESS • OPPORTUNITIES • COLLABORATION • INNOVATION • LEADERSHIP • ON LINKEDIN • `,
-    `LINKEDIN • EMAIL • OUTREACH • TRACKING • ANALYTICS • AUTOMATION • AI • PRODUCTIVITY • AUTOMATION • AI • PRODUCTIVITY`,
-  ];
+  useEffect(() => {
+    // Hide scrollbar but keep scrolling functionality
+    const style = document.createElement('style');
+    style.textContent = `
+      html, body {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+      html::-webkit-scrollbar, body::-webkit-scrollbar {
+        display: none;
+      }
+    `;
+    document.head.appendChild(style);
+    
+    // Cleanup on unmount
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
 
   return (
-    <div>
-      {/* Capture referral code from URL */}
-      <Suspense fallback={null}>
-        <ReferralCapture />
-      </Suspense>
-      
-    <div className="min-h-screen bg-background px-4 sm:px-6 lg:px-8 py-2">
-      <Header onTryForFree={handleDownload} />
+    <div className="dark min-h-screen bg-background">
+      <div className="px-4 sm:px-6 lg:px-8 py-2">
+        <Header onTryForFree={handleDownload} className="fixed top-0 left-0 right-0 z-50 px-8" />
+      </div>
 
-      <main className="mx-auto max-w-7xl min-h-[calc(100vh-10rem)] flex flex-col lg:flex-row">
-        {/* Left Panel - Callout */}
-        <div className="flex-1 flex flex-col justify-center px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
-          <div className="max-w-lg mx-auto lg:mx-0 text-center">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-tiempos-medium font-bold text-primary mb-4 lg:mb-6 leading-tight">
-              Made for <br className="block" /> <CyclingFadeText texts={networkerTexts} />.
-            </h1>
-            <p className="text-base sm:text-lg text-secondary mb-8 lg:mb-12 leading-relaxed">
-              The AI for people searching, email finding, <br className="hidden sm:block" />and outreach tracking
-            </p>
-            <div className="flex justify-center">
-              {isLoading ? (
-                <div className="animate-pulse bg-gray-200 h-8 w-20 rounded"></div>
-              ) : user ? (
-                <button
-                  onClick={handleDashboardClick}
-                  className="bg-primary cursor-pointer text-background px-4 py-1.5 rounded-lg text-sm transition-colors font-medium"
-                >
-                  Dashboard
-                </button>
-              ) : (
-                <button
-                  onClick={handleDownload}
-                  className="flex items-center justify-center px-6 py-2 bg-primary text-background font-medium rounded-lg hover:opacity-90 cursor-pointer transition-colors shadow-md"
-                >
-                  <img
-                    src="/chrome.png"
-                    alt="Chrome"
-                    className="inline-block w-4 h-4 mr-2 align-middle"
-                    style={{ verticalAlign: "middle" }}
-                  />
-                  Download Now
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
+      <main className="relative w-full min-h-[calc(100vh-5rem)] flex items-center justify-center py-4 lg:py-6 px-4 sm:px-6 lg:px-8 overflow-visible mt-16 mb-8">
+        {/* Particles Background */}
+        <ParticlesBackground />
 
-        {/* Right Panel - Blue Square */}
-        <div 
-          className="w-full lg:w-1/2 bg-[#1E67B5] flex items-center justify-center rounded-xl relative overflow-hidden min-h-[300px] lg:min-h-0 mt-8 lg:mt-0"
-          ref={containerRef}
+        {/* Hand constellation - desktop only */}
+        {/* <motion.div 
+          initial={{ opacity: 0, x: 0 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 1.0, delay: 1.2, ease: "easeOut" }}
+          className="hidden lg:block absolute -left-20 top-1/2 -translate-y-1/2 z-0 pointer-events-none"
         >
-          {/* Hands image */}
-          <div className="text-white text-center z-10 scale-105">
-            <Float amplitude={[5, 10, 5]} rotationRange={[5, 5, 0]} speed={0.5}>
-              <img
-                src="/hands.png"
-                alt="Hands illustration"
-                className="mx-auto w-full h-auto object-contain"
+          <HandConstellation 
+            scale={0.7}
+            connectionDistance={50}
+            className="xl:scale-110 2xl:scale-125 origin-center"
+          />
+        </motion.div> */}
+
+        <div className="relative z-10 w-full max-w-4xl flex flex-col items-center justify-center text-center overflow-visible">
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+            className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-primary mb-6"
+          >
+            Warm Recruiting, <AnimatedShinyText >100x Faster</AnimatedShinyText>.
+          </motion.h1>
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
+            className="w-full max-w-2xl text-secondary text-[16px] mb-16"
+          >
+            Supercharge your LinkedIn with automatic email finding, profile analysis, and personalized outreach in your tone — then send it directly inside LinkedIn.
+          </motion.h2>
+          
+          {/* Video */}
+          <div className="relative w-full max-w-md lg:max-w-2xl p-8 overflow-visible">
+            {/* Glow wrapper with gradient background */}
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1.2, delay: 0.8, ease: "easeOut" }}
+              className="absolute inset-8"
+            >
+              <div 
+                className="w-full h-full rounded-3xl opacity-70"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(34,211,238,0.55) 0%, rgba(56,189,248,0.52) 20%, rgba(59,130,246,0.55) 40%, rgba(96,165,250,0.45) 60%, rgba(59,78,179,0.50) 80%, rgba(34,211,238,0.42) 100%)',
+                  filter: 'blur(48px)',
+                }}
               />
-            </Float>
-          </div>
-
-          {/* Curved text overlay */}
-          <div className="absolute w-full h-full flex flex-col">
-            {paths.map((path, i) => (
-              <AnimatedPathText
-                key={`auto-path-${i}`}
-                path={path}
-                pathId={`auto-path-${i}`}
-                svgClassName={`absolute -left-[100px] top-0 w-[calc(100%+200px)] h-full`}
-                viewBox="0 0 100 100"
-                text={texts[i] || ''}
-                textClassName={`text-primary text-[2px] font-bold fill-black/35`}
-                animationType="auto"
-                duration={i * 0.5 + 8}
-                textAnchor="start"
-              />
-            ))}
-          </div>
-        </div>
-
-      </main>
-
-      {/* Second Section – Features */}
-
-      <div className="mx-auto max-w-7xl pt-12 sm:pt-16 lg:pt-24 min-h-[calc(100vh-10rem)] flex flex-col items-center justify-center pb-8 sm:pb-12">
-
-        <div className="flex-1 flex flex-col justify-center px-4 sm:px-8 py-4 sm:py-6 text-center">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-primary mb-4 sm:mb-6 font-tiempos-medium">Networking, but 20x faster.</h2>
-          <p className="max-w-lg text-base sm:text-lg text-secondary mb-8 sm:mb-12 leading-relaxed px-4">
-            Linkmail helps you level up your networking and outreach – find more jobs, outreach more people, send more follow ups.
-          </p>
-        </div>
-
-        <div className="flex flex-col w-full items-stretch justify-center">
-          {/* Left: Video Demo */}
-          <div className="flex-1 flex flex-col justify-center items-center px-4 sm:px-8 lg:px-12 py-4">
-            <div className="w-full max-w-3xl rounded-xl overflow-hidden border border-border">
+            </motion.div>
+            
+            {/* Video wrapper with backdrop blur */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1.0, delay: 1.0, ease: "easeOut" }}
+              className="relative p-4 bg-white/10 backdrop-blur-sm rounded-4xl border border-white/10 shadow-2xl overflow-hidden"
+            >
               <video
                 src="/demo_1.webm"
                 autoPlay
                 loop
                 muted
                 playsInline
-                className="w-full h-auto object-contain scale-101"
-                poster="/demo_poster.png"
+                className="w-full h-auto object-cover rounded-2xl shadow-md"
               >
                 Your browser does not support the video tag.
               </video>
-            </div>
+              <BorderBeam
+                duration={6}
+                size={400}
+                colorFrom="#3b82f6"
+                colorTo="#22d3ee"
+                className="from-transparent via-blue-500 to-transparent"
+              />
+              <BorderBeam
+                duration={6}
+                delay={3}
+                size={400}
+                borderWidth={2}
+                colorFrom="#22d3ee"
+                colorTo="#ec4899"
+                className="from-transparent via-cyan-500 to-transparent"
+              />
+            </motion.div>
           </div>
+        </div>
+      </main>
 
-          {/* Right: Expandable Features */}
-          {/* Import Lucide icons at the top of your file if not already imported:
-              import { Linkedin, MailCheck, ListChecks } from "lucide-react";
-          */}
-          <div className="flex-1 flex flex-col justify-center items-center py-4 mt-8 sm:mt-12">
-            <div className="flex flex-col sm:flex-row w-full max-w-5xl gap-6 sm:gap-8 px-4 sm:px-0">
-              {[
-                {
-                  title: "Your LinkedIn Companion",
-                  content:
-                    "Linkmail lives right inside LinkedIn and appears when you're on someone's profile.",
-                  icon: <Linkedin strokeWidth={1.5} className="w-8 h-8 mr-2 text-primary" />,
-                },
-                {
-                  title: "Automatic Email Finding",
-                  content:
-                    "Get verified professional emails for your prospects instantly. Useful for students and recruiters.",
-                  icon: <MailCheck strokeWidth={1.5} className="w-8 h-8 mr-2 text-primary" />,
-                },
-                {
-                  title: "Outreach with Agents",
-                  content:
-                    "Track your outreach, follow-ups, and responses in one place. Stay organized and never miss an opportunity to connect.",
-                  icon: <ListChecks strokeWidth={1.5} className="w-8 h-8 mr-2 text-primary" />,
-                },
-              ].map((feature, idx) => (
-                <div key={idx} className="w-full sm:w-1/3 my-4 sm:my-8 last:mb-0">
-                  <div className="mb-4">{feature.icon}</div>
-                  <h3 className="text-xl sm:text-2xl font-semibold text-primary font-tiempos-regular mb-2 flex items-center gap-2">
-                    {feature.title}
-                  </h3>
-                  <p className="text-sm sm:text-md text-tertiary mt-4 sm:mt-6">{feature.content}</p>
-                </div>
-              ))}
+      {/* Testimonials Section */}
+      <section className="w-full py-16 lg:py-20 bg-background overflow-hidden relative">
+        {/* Background decoration */}
+        <div className="absolute inset-0 opacity-[0.02]">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-accent rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-primary rounded-full blur-3xl"></div>
+        </div>
+        
+        <div className="w-full px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center mb-12">
+            <h3 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-primary mb-3">
+              Success Stories
+            </h3>
+            <p className="text-base sm:text-lg text-secondary max-w-2xl mx-auto">
+              Real stories from students who landed their dream job from a Linkmail.
+            </p>
+          </div>
+          
+          <div className="relative overflow-hidden">
+            {/* Gradient overlays for fade effect */}
+            <div className="absolute left-0 top-0 bottom-0 w-20 lg:w-32 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none"></div>
+            <div className="absolute right-0 top-0 bottom-0 w-20 lg:w-32 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none"></div>
+            
+            {/* Scrollable Container */}
+            <div className="overflow-hidden">
+              {/* Continuous Scrolling Container */}
+              <div className="flex gap-6 py-2 animate-scroll-seamless min-w-full lg:min-w-[1200px]">
+                {/* Show 6 cards twice for seamless infinite loop */}
+                {[...testimonials, testimonials[0], testimonials[1], ...testimonials, testimonials[0], testimonials[1]].map((testimonial, index) => (
+                  <div
+                    key={index}
+                    className="flex-shrink-0 w-80 md:w-96 lg:w-[400px] max-w-[90vw] bg-background border border-border rounded-xl p-4 sm:p-5 shadow-md group select-none pointer-events-none"
+                  >
+                    {/* Quote icon */}
+                    <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center mb-3">
+                      <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
+                      </svg>
+                    </div>
+                    
+                    <p className="text-sm text-secondary leading-relaxed mb-4">
+                      {testimonial.quote}
+                    </p>
+                    
+                    <div className="flex items-center gap-2 pt-3 border-t border-border">
+                      {/* Avatar placeholder */}
+                      <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                        {testimonial.author.charAt(0)}
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-primary">
+                          {testimonial.author}
+                        </p>
+                        <p className="text-xs text-secondary">
+                          {testimonial.role}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
+        
+        {/* Add CSS animation */}
+        <style jsx>{`
+          @keyframes scrollSeamless {
+            0% {
+              transform: translateX(0);
+            }
+            100% {
+              transform: translateX(-50%);
+            }
+          }
+          
+          .animate-scroll-seamless {
+            animation: scrollSeamless 5s linear infinite;
+          }
+          
+          @media (min-width: 1024px) {
+            .animate-scroll-seamless {
+              animation: scrollSeamless 5s linear infinite;
+            }
+          }
+        `}</style>
+      </section>
 
-      
-      </div>
-
-
-    </div>
-
-    <Footer />
-            
+      <Footer />
     </div>
   );
 }
