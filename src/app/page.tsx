@@ -93,17 +93,28 @@ export default function Home() {
           >
             Warm Recruiting, <AnimatedShinyText >100x Faster</AnimatedShinyText>.
           </motion.h1>
-          <motion.h2 
+          <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
-            className="w-full max-w-2xl text-secondary text-[16px] mb-16"
+            className="w-full max-w-2xl text-secondary text-[18px] mb-16"
           >
-            Supercharge your LinkedIn with automatic email finding, profile analysis, and personalized outreach in your tone — then send it directly inside LinkedIn.
-          </motion.h2>
+            <p className="mb-3">Supercharge your LinkedIn with:</p>
+            <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-[16px]">
+              <span className="flex items-center gap-2">
+                <span className="text-accent">✓</span> Automatic email finding
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="text-accent">✓</span> Profile analysis
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="text-accent">✓</span> Personalized outreach in your tone
+              </span>
+            </div>
+          </motion.div>
           
           {/* Video */}
-          <div className="relative w-full max-w-md lg:max-w-2xl p-8 overflow-visible">
+          <div className="relative w-full max-w-lg lg:max-w-3xl p-8 overflow-visible">
             {/* Glow wrapper with gradient background */}
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
