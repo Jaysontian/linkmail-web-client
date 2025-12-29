@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, usePathname } from 'next/navigation';
-import { Menu, X, Home, User, Mail, Users, FileText, PanelLeftClose, PanelLeftOpen, PanelLeft, LayoutDashboard, SquareUserRound, MessageSquare, CircleDotDashed, Download, X as XIcon, Clock } from 'lucide-react';
+import { Menu, X, Home, User, Mail, Users, FileText, PanelLeftClose, PanelLeftOpen, PanelLeft, LayoutDashboard, SquareUserRound, MessageSquare, CircleDotDashed, Download, X as XIcon } from 'lucide-react';
 import { LoginButton } from './LoginButton';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useState, useEffect } from 'react';
@@ -22,7 +22,6 @@ export function Sidebar({ expanded, onToggle }: SidebarProps) {
     { name: 'Profile', href: '/dashboard/profile', icon: SquareUserRound },
     { name: 'Follow Ups', href: '/dashboard/connections', icon: CircleDotDashed },
     { name: 'Templates', href: '/dashboard/templates', icon: FileText },
-    { name: 'Scheduled', href: '/dashboard/scheduled', icon: Clock },
   ];
 
   const handleNavigation = (href: string) => {
