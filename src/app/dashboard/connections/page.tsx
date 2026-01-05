@@ -84,20 +84,26 @@ export default function FollowUpsPage() {
 
   const handleMarkAsFollowUp = async (contactId: number, e: React.MouseEvent) => {
     e.stopPropagation();
-    
+
     try {
       setUpdatingStatus(contactId);
       const response = await apiClient.updateConnectionStatus(contactId, 'follow_up_sent');
-      
+
+      console.log('Update response:', response);
+
       if (response.success) {
         // Update local state
-        setConnections(prev => 
-          prev.map(conn => 
-            conn.contact_id === contactId 
-              ? { ...conn, status: 'follow_up_sent', updated_at: new Date().toISOString() } 
+        setConnections(prev => {
+          const updated = prev.map(conn =>
+            conn.contact_id === contactId
+              ? { ...conn, status: 'follow_up_sent' as const, updated_at: new Date().toISOString() }
               : conn
-          )
-        );
+          );
+          console.log('Updated connections:', updated.find(c => c.contact_id === contactId));
+          return updated;
+        });
+      } else {
+        console.error('Failed to update status - API returned error:', response.error);
       }
     } catch (err) {
       console.error('Failed to update status:', err);
@@ -108,20 +114,26 @@ export default function FollowUpsPage() {
 
   const handleMoveBackToInitial = async (contactId: number, e: React.MouseEvent) => {
     e.stopPropagation();
-    
+
     try {
       setUpdatingStatus(contactId);
       const response = await apiClient.updateConnectionStatus(contactId, 'active');
-      
+
+      console.log('Move back response:', response);
+
       if (response.success) {
         // Update local state
-        setConnections(prev => 
-          prev.map(conn => 
-            conn.contact_id === contactId 
-              ? { ...conn, status: 'active', updated_at: new Date().toISOString() } 
+        setConnections(prev => {
+          const updated = prev.map(conn =>
+            conn.contact_id === contactId
+              ? { ...conn, status: 'active' as const, updated_at: new Date().toISOString() }
               : conn
-          )
-        );
+          );
+          console.log('Moved back connection:', updated.find(c => c.contact_id === contactId));
+          return updated;
+        });
+      } else {
+        console.error('Failed to move back - API returned error:', response.error);
       }
     } catch (err) {
       console.error('Failed to update status:', err);
@@ -202,13 +214,24 @@ export default function FollowUpsPage() {
     );
   }
 
+  const getInitialEmailDateForCard = (conn: Connection) => {
+    // Get the first message date, or fall back to created_at
+    if (conn.messages && conn.messages.length > 0) {
+      const sortedMessages = [...conn.messages].sort(
+        (a, b) => new Date(a.sent_at).getTime() - new Date(b.sent_at).getTime()
+      );
+      return sortedMessages[0].sent_at;
+    }
+    return conn.created_at;
+  };
+
   const ConnectionCard = ({ connection, isFollowUp }: { connection: Connection; isFollowUp: boolean }) => {
-    const emailDate = isFollowUp ? connection.updated_at : getInitialEmailDate(connection);
+    const emailDate = isFollowUp ? connection.updated_at : getInitialEmailDateForCard(connection);
     const [imageError, setImageError] = useState(false);
-    
+
     // Generate initials for fallback
     const initials = `${connection.first_name?.[0] || ''}${connection.last_name?.[0] || ''}`.toUpperCase();
-    
+
     return (
       <div
         onClick={() => handleConnectionClick(connection.contact_id)}
